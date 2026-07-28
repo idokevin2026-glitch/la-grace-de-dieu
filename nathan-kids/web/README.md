@@ -67,10 +67,16 @@ ou injectées à la volée. Pensez à déployer aussi l'Edge Function `auth`
 
 ## Périmètre
 
-Couvre le parcours quotidien complet : connexion, tableau de bord, encaissement
+Parcours quotidien complet : connexion, tableau de bord, encaissement
 (multi-lignes, 5 modes de paiement, crédit client), gestion de stock (réassort,
-ajustement), recouvrement de crédits, fiche du jour, et — pour l'admin — caisse/
-banque et gestion de l'équipe. L'inventaire physique multi-produits, le scan
-code-barres (caméra) et l'export PDF/Excel de la fiche du jour réutilisent les
-mêmes briques d'API (`inventory_count`, `GET /products/barcode/:code`,
-`sales_daily`) et constituent les compléments naturels.
+ajustement, **ajout de produit** avec EAN-13 valide généré), **inventaire
+physique** multi-produits (seuls les écarts sont enregistrés), **scan
+code-barres** (caméra via `BarcodeDetector`, repli saisie manuelle),
+recouvrement de crédits, fiche du jour avec **export Excel (CSV)** et **PDF**
+(impression navigateur), et — pour l'admin — caisse/banque + gestion de l'équipe.
+
+Modules utilitaires testés (Node) : `js/barcode.js` (EAN-13 + clé de contrôle,
+`js/barcode.test.js`) et `js/api.js` (outbox offline, `js/api.test.js`).
+
+Compléments restants : durcissement prod (rate-limit `/auth/*`, OTP SMS au reset,
+rotation des refresh tokens).

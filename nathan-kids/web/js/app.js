@@ -238,7 +238,10 @@
     shell(
       "Nouvelle vente",
       `
-      <input id="q" class="search" placeholder="Rechercher un article…"/>
+      <div class="search-row">
+        <input id="q" class="search" placeholder="Rechercher un article…"/>
+        <button class="scan-btn" id="scan" title="Scanner un code-barres">📷</button>
+      </div>
       <div class="grid" id="prod-grid">
         ${state.products
           .map(
@@ -299,6 +302,76 @@
     const cust = $("#cust");
     if (cust) cust.oninput = (e) => (state.customer = e.target.value);
     $("#checkout").onclick = checkout;
+    $("#scan").onclick = scan;
+  }
+
+  // Scan code-barres : BarcodeDetector si dispo (caméra), sinon saisie manuelle.
+  // Résout d'abord dans le cache local (offline), puis interroge l'API.
+  async function scan() {
+    let code = null;
+    if ("BarcodeDetector" in window && navigator.mediaDevices) {
+      try {
+        code = await scanCamera();
+      } catch {
+        /* repli saisie manuelle */
+      }
+    }
+    if (!code) code = (prompt("Code-barres (ou saisie manuelle) :") || "").trim();
+    if (!code) return;
+    let p = state.products.find((x) => x.barcode === code);
+    if (!p) {
+      try {
+        const rows = await NK.reads.byBarcode(code);
+        p = rows && rows[0];
+      } catch {
+        /* offline */
+      }
+    }
+    if (!p) return toast("Article inconnu pour ce code", "err");
+    addToCart(p.id);
+    toast(`+ ${p.name_fr}`);
+  }
+
+  function scanCamera() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const det = new window.BarcodeDetector({ formats: ["ean_13", "ean_8", "code_128", "upc_a"] });
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        const overlay = document.createElement("div");
+        overlay.className = "scan-overlay";
+        const video = document.createElement("video");
+        video.setAttribute("playsinline", "");
+        video.srcObject = stream;
+        await video.play();
+        const close = document.createElement("button");
+        close.textContent = "Fermer";
+        close.className = "primary";
+        overlay.append(video, close);
+        document.body.appendChild(overlay);
+        let done = false;
+        const stop = (val, err) => {
+          if (done) return;
+          done = true;
+          stream.getTracks().forEach((t) => t.stop());
+          overlay.remove();
+          err ? reject(err) : resolve(val);
+        };
+        close.onclick = () => stop(null);
+        const tick = async () => {
+          if (done) return;
+          try {
+            const codes = await det.detect(video);
+            if (codes && codes.length) return stop(codes[0].rawValue);
+          } catch {
+            /* continue */
+          }
+          requestAnimationFrame(tick);
+        };
+        tick();
+      } catch (e) {
+        reject(e);
+      }
+    });
   }
 
   function stockOf(pid) {
@@ -348,6 +421,10 @@
     shell(
       "Stock",
       `
+      <div class="stock-actions">
+        <button id="inv-btn">📋 Inventaire</button>
+        ${admin ? `<button id="add-prod-btn">＋ Produit</button>` : ""}
+      </div>
       <input id="q" class="search" placeholder="Rechercher…"/>
       <div class="list" id="stock-list">
         ${state.products
@@ -394,6 +471,112 @@
         toast("Ajustement enregistré ✓");
         refresh(false);
       }
+    };
+    $("#inv-btn").onclick = () => go("inventory");
+    const addBtn = $("#add-prod-btn");
+    if (addBtn) addBtn.onclick = addProductModal;
+  }
+
+  // Inventaire physique : saisir le comptage réel, n'envoyer que les écarts.
+  function screenInventory() {
+    shell(
+      "Inventaire",
+      `
+      <p class="muted">Saisissez le stock physiquement compté. Seuls les écarts sont enregistrés.</p>
+      <div class="list">
+        ${state.products
+          .map(
+            (p) => `
+          <div class="row">
+            <div class="row-main"><strong>${esc(p.name_fr)}</strong><small>théorique : ${p.stock}</small></div>
+            <input class="count" type="number" min="0" inputmode="numeric" data-c="${p.id}" value="${p.stock}" />
+          </div>`,
+          )
+          .join("")}
+      </div>
+      <button class="primary big" id="inv-save">Valider l'inventaire</button>
+      <button class="link" id="inv-cancel">Annuler</button>`,
+    );
+    $("#inv-cancel").onclick = () => go("stock");
+    $("#inv-save").onclick = async () => {
+      const counts = [];
+      app.querySelectorAll(".count").forEach((el) => {
+        const pid = el.dataset.c;
+        const counted = parseInt(el.value, 10);
+        const p = state.products.find((x) => String(x.id) === pid);
+        if (!Number.isNaN(counted) && p && counted !== p.stock) counts.push({ productId: pid, counted });
+      });
+      if (!counts.length) return toast("Aucun écart à enregistrer");
+      await NK.ops.inventory(counts);
+      toast(`${counts.length} écart(s) enregistré(s) ✓`);
+      await refresh(false);
+      go("stock");
+    };
+  }
+
+  // Ajout d'un produit (admin). Code-barres EAN-13 valide généré si absent.
+  function addProductModal() {
+    const body = `
+      <h3>Nouveau produit</h3>
+      <div class="form">
+        <input id="f-fr" placeholder="Nom (français)"/>
+        <input id="f-en" placeholder="Nom (anglais)"/>
+        <select id="f-cat"><option value="vetements">Vêtements</option><option value="cosmetiques">Cosmétiques</option></select>
+        <div class="two"><input id="f-price" type="number" placeholder="Prix de vente"/><input id="f-cost" type="number" placeholder="Coût d'achat"/></div>
+        <div class="two"><input id="f-stock" type="number" placeholder="Stock initial" value="0"/><input id="f-thr" type="number" placeholder="Seuil alerte" value="4"/></div>
+        <input id="f-sup" placeholder="Fournisseur (optionnel)"/>
+        <input id="f-code" placeholder="Code-barres (vide = généré)"/>
+      </div>`;
+    modal(body, async () => {
+      const fr = $("#f-fr").value.trim();
+      const en = $("#f-en").value.trim() || fr;
+      if (!fr) {
+        toast("Nom requis", "err");
+        return false;
+      }
+      let code = $("#f-code").value.trim();
+      if (code && !NKBarcode.isValid(code)) {
+        toast("Code-barres EAN-13 invalide", "err");
+        return false;
+      }
+      if (!code) code = NKBarcode.generate();
+      try {
+        await NK.ops.createProduct({
+          name_fr: fr,
+          name_en: en,
+          category: $("#f-cat").value,
+          price: +$("#f-price").value || 0,
+          cost: +$("#f-cost").value || 0,
+          stock: +$("#f-stock").value || 0,
+          threshold: +$("#f-thr").value || 4,
+          supplier: $("#f-sup").value.trim() || null,
+          barcode: code,
+        });
+        toast("Produit ajouté ✓");
+        await refresh(false);
+        go("stock");
+        return true;
+      } catch (e) {
+        toast(errMsg(e), "err");
+        return false;
+      }
+    });
+  }
+
+  // Modale générique (contenu + action de validation qui renvoie true pour fermer).
+  function modal(bodyHTML, onOk) {
+    const m = document.createElement("div");
+    m.className = "modal-back";
+    m.innerHTML = `<div class="modal">${bodyHTML}<div class="modal-actions"><button class="link" data-x>Annuler</button><button class="primary" data-ok>Valider</button></div></div>`;
+    document.body.appendChild(m);
+    const close = () => m.remove();
+    m.querySelector("[data-x]").onclick = close;
+    m.onclick = (e) => {
+      if (e.target === m) close();
+    };
+    m.querySelector("[data-ok]").onclick = async () => {
+      const ok = await onOk();
+      if (ok !== false) close();
     };
   }
 
@@ -450,6 +633,10 @@
       "Fiche du jour",
       d
         ? `
+      <div class="stock-actions">
+        <button id="exp-csv">⬇ Excel (CSV)</button>
+        <button id="exp-pdf">🖨 PDF</button>
+      </div>
       <section class="cards">
         <div class="card big"><span class="k">Recette</span><span class="v">${fmt(d.revenue)}</span></div>
         <div class="card big"><span class="k">Ventes</span><span class="v">${d.count}</span></div>
@@ -464,6 +651,13 @@
       <div class="list">${(d.operations || []).map((o) => `<div class="row"><div class="row-main"><strong>${esc(o.time)}</strong><small>${esc(o.label)}</small></div><span>${esc(o.method)}</span><span>${fmt(o.amount)}</span></div>`).join("") || '<p class="muted">—</p>'}</div>`
         : `<p class="muted">Indisponible hors ligne.</p>`,
     );
+    if (d) {
+      const shopName = (NK.getShop() || {}).name || "NATHAN KIDS";
+      $("#exp-csv").onclick = () => NKExport.csv(d, admin);
+      $("#exp-pdf").onclick = () => {
+        if (!NKExport.printPDF(d, admin, shopName)) toast("Autorisez les fenêtres pop-up pour le PDF", "err");
+      };
+    }
   }
 
   async function screenCash() {
@@ -544,6 +738,7 @@
     home: screenHome,
     sales: screenSales,
     stock: screenStock,
+    inventory: screenInventory,
     credits: screenCredits,
     daily: screenDaily,
     cash: screenCash,

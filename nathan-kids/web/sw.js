@@ -2,12 +2,14 @@
 // Stratégie : cache-first pour les fichiers statiques de l'app ; le RÉSEAU
 // n'est jamais mis en cache pour les appels API (données = toujours frais /
 // gérés par l'outbox côté app). Voir js/api.js.
-const CACHE = "nk-shell-v1";
+const CACHE = "nk-shell-v2";
 const SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./js/api.js",
+  "./js/barcode.js",
+  "./js/export.js",
   "./js/app.js",
   "./config.js",
   "./manifest.webmanifest",

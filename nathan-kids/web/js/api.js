@@ -80,6 +80,7 @@ const NK = (() => {
       "content-type": "application/json",
       apikey: CFG.SUPABASE_ANON_KEY,
       Authorization: `Bearer ${tokens ? tokens.accessToken : CFG.SUPABASE_ANON_KEY}`,
+      Prefer: "return=representation", // renvoie la ligne créée/modifiée (insert/patch)
     };
   }
 
@@ -223,6 +224,12 @@ const NK = (() => {
     removeStaff(id) {
       return rpc("auth_remove_staff", { p_user_id: id });
     },
+    // Création de produit (admin). shop_id injecté depuis la session ; la RLS
+    // vérifie `shop_id = auth_shop_id()`. Écriture en ligne (retour de la ligne).
+    createProduct(p) {
+      const shopId = (shop && shop.id) || null;
+      return rest("POST", "products?select=*", { ...p, shop_id: shopId });
+    },
   };
 
   // ---- Lectures / cache local ----------------------------------------------
@@ -234,6 +241,7 @@ const NK = (() => {
   const reads = {
     // Produits via la vue products_api (cost masqué au staff par la RLS).
     products: () => get("products_api?select=*&order=name_fr.asc"),
+    byBarcode: (code) => get(`products_api?select=*&barcode=eq.${encodeURIComponent(code)}&limit=1`),
     credits: (status) =>
       get(`credits?select=*${status ? `&paid=eq.${status === "paid"}` : ""}&order=created_at.desc`),
     customers: () => get("customers?select=*&order=name.asc"),
