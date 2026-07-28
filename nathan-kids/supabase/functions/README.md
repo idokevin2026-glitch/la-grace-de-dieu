@@ -45,12 +45,21 @@ supabase functions deploy auth --no-verify-jwt   # /auth/* est pré-auth
 `role: authenticated` = rôle Postgres attendu par Supabase ; `user_role` = rôle
 applicatif lu par la RLS (`auth_role()` → `is_admin()`).
 
-### À durcir en production (ARCHITECTURE.md §3/§7)
+### Sécurité en place
 
-- **Rate-limiting** anti-brute-force sur `/login` et `/reset-pin`.
+- **Rate-limiting** anti-brute-force sur `/login` (5/5 min par IP+boutique) et
+  `/reset-pin` (5/15 min), via `rate_check`/`rate_reset` (`0006_security.sql`),
+  keyé par **IP** pour éviter de verrouiller toute la boutique.
+- **Journal d'audit** (`auth_audit`) : `login_ok`/`login_fail`/`pin_reset`
+  (par l'Edge Function) + recouvrement de crédit, mouvements de caisse et
+  désactivation de vendeuse (déclencheurs SQL). Lecture réservée à l'admin.
+
+### À durcir encore (ARCHITECTURE.md §3/§7)
+
 - **Refresh tokens** : ici stateless (non révocables). Passer à un stockage
   serveur + rotation.
-- **OTP SMS** au reset (remplacer la simple correspondance du téléphone).
+- **OTP SMS** au reset (remplacer la simple correspondance du téléphone) —
+  Twilio ou passerelle locale (Orange/MTN).
 
 ## Le reste de l'API
 

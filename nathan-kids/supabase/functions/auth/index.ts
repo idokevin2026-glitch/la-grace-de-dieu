@@ -59,6 +59,11 @@ function apiError(code: string, message: string, status: number, field?: string)
   return json({ error: { code, message, field } }, status);
 }
 
+function clientIp(req: Request): string {
+  const xff = req.headers.get("x-forwarded-for");
+  return (xff ? xff.split(",")[0] : req.headers.get("x-real-ip") || "unknown").trim();
+}
+
 /** Appelle une fonction SQL via PostgREST RPC avec la clé service-role. */
 async function rpc(fn: string, args: Record<string, unknown>) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
@@ -171,7 +176,31 @@ Deno.serve(async (req) => {
       }
 
       case "/login": {
-        const id = await rpc("auth_login", { p_shop_id: body.shopId, p_pin: body.pin });
+        // Anti-brute-force : 5 tentatives / 5 min par IP+boutique, verrou 5 min.
+        const key = `login:${clientIp(req)}:${body.shopId}`;
+        const allowed = await rpc("rate_check", { p_key: key, p_max: 5, p_window_sec: 300, p_lock_sec: 300 });
+        if (allowed === false) {
+          return apiError("too_many_attempts", "Trop de tentatives. Réessayez plus tard.", 429);
+        }
+        let id;
+        try {
+          id = await rpc("auth_login", { p_shop_id: body.shopId, p_pin: body.pin });
+        } catch (e) {
+          // Échec journalisé HORS de la transaction du RPC (qui a levé/annulé).
+          await rpc("log_event", {
+            p_event: "login_fail",
+            p_detail: { ip: clientIp(req) },
+            p_shop: body.shopId,
+          }).catch(() => {});
+          throw e;
+        }
+        await rpc("rate_reset", { p_key: key }).catch(() => {});
+        await rpc("log_event", {
+          p_event: "login_ok",
+          p_detail: { ip: clientIp(req), role: id.role },
+          p_shop: id.shopId,
+          p_user: id.userId,
+        }).catch(() => {});
         const identity = { shopId: id.shopId, userId: id.userId, role: id.role };
         return json({
           ...(await tokensFor(identity)),
@@ -198,12 +227,22 @@ Deno.serve(async (req) => {
       }
 
       case "/reset-pin": {
+        // Anti-brute-force renforcé sur le reset (fenêtre 15 min).
+        const key = `reset:${clientIp(req)}:${body.shopId}`;
+        const allowed = await rpc("rate_check", { p_key: key, p_max: 5, p_window_sec: 900, p_lock_sec: 900 });
+        if (allowed === false) {
+          return apiError("too_many_attempts", "Trop de tentatives. Réessayez plus tard.", 429);
+        }
         const r = await rpc("auth_reset_pin", {
           p_shop_id: body.shopId,
           p_step: body.step,
           p_phone: body.phone,
           p_new_pin: body.newPin ?? null,
         });
+        if (body.step === "set") {
+          await rpc("rate_reset", { p_key: key }).catch(() => {});
+          await rpc("log_event", { p_event: "pin_reset", p_detail: { ip: clientIp(req) }, p_shop: body.shopId }).catch(() => {});
+        }
         return json(r);
       }
 
