@@ -1,13 +1,30 @@
-# NATHAN KIDS — Backend (Phase 2)
+# NATHAN KIDS — Application (Phase 2)
 
-Fondation base de données pour l'application de gestion de stock / caisse d'une
-boutique d'articles enfants (vêtements + cosmétiques) en Afrique de l'Ouest.
-Ce dossier implémente **l'étape 1 de l'ordre de mise en œuvre** d'`ARCHITECTURE.md`
-(schéma + migrations + RLS multi-tenant) **et le cœur transactionnel** de l'étape
-métier (fonctions atomiques `finalize_sale`, `pay_credit`, `restock`…).
+Application **cloud, multi-boutiques, offline-first** de gestion de stock / caisse
+pour une boutique d'articles enfants (vêtements + cosmétiques) en Afrique de
+l'Ouest. Migre le prototype mono-poste (`Nathan Kids Stock.dc.html`, localStorage)
+vers **Supabase (PostgreSQL + PostgREST + RLS)** + une **PWA** installable.
 
-> Cette fondation vit dans son propre sous-dossier ; le site **La Grâce de Dieu**
+> L'application vit dans son propre sous-dossier ; le site **La Grâce de Dieu**
 > à la racine du dépôt n'est pas modifié.
+
+## État (ordre d'ARCHITECTURE.md §9)
+
+| # | Étape | État |
+|---|---|---|
+| 1 | Schéma + migrations + RLS multi-tenant | ✅ testé |
+| 2 | Auth PIN (bcrypt, rôles, JWT) | ✅ testé (SQL) + Edge Function |
+| 3 | Produits (CRUD, réassort, ajustement, inventaire) | ✅ RPC + écrans |
+| 4 | Ventes (`finalize_sale`) + crédits + clients | ✅ testé + écrans |
+| 5 | Caisse/banque + fiche du jour | ✅ testé + écrans |
+| 6 | Présences (attendance) | ✅ login/logout auto |
+| 7 | Offline-first (outbox + idempotence + `/sync`) | ✅ testé (Node) |
+| 8 | Front PWA | ✅ parcours quotidien complet |
+
+Répertoires : **`supabase/`** (migrations + Edge Function `auth`) et **`web/`**
+(PWA — voir `web/README.md`). Compléments naturels restants : inventaire physique
+multi-produits, scan code-barres caméra, export PDF/Excel, durcissement prod
+(rate-limit `/auth/*`, OTP SMS, rotation des refresh tokens).
 
 ## Ce qui est livré
 
@@ -17,7 +34,10 @@ métier (fonctions atomiques `finalize_sale`, `pay_credit`, `restock`…).
 | `supabase/migrations/0002_rls.sql`  | Row-Level Security multi-tenant + finances réservées à l'admin + vue `products_api` (masquage `cost`/marge pour `staff`). |
 | `supabase/migrations/0003_functions.sql` | Fonctions métier **atomiques** (RPC) transcrites de `BUSINESS_LOGIC.md`. |
 | `supabase/migrations/0004_auth.sql` | Auth PIN (cœur SQL) : signup/login/reset, PIN **bcrypt** (pgcrypto), rôles, pointage auto (`BUSINESS_LOGIC.md §9`). |
+| `supabase/migrations/0005_aggregates.sql` | Agrégats `sales_daily` (fiche du jour) + `sync_since` (pull offline). |
+| `supabase/functions/auth/` | Edge Function : login PIN → signature du JWT Supabase (voir `functions/README.md`). |
 | `supabase/seed/seed.sql` | Boutique NATHAN KIDS + admin Mme Silué + comptes + 12 produits du proto. |
+| `web/` | **PWA** installable (JS pur, offline-first) recâblée sur l'API (voir `web/README.md`). |
 
 ## Modèle retenu
 
