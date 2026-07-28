@@ -44,13 +44,15 @@ create table public.users (
   name          text not null,
   role          text not null check (role in ('admin','staff')),
   -- NE JAMAIS stocker le PIN en clair (le proto le fait ; corrigé ici) :
-  pin_hash      text not null,                    -- bcrypt/argon2 du PIN 4 chiffres
+  pin_hash      text not null,                    -- bcrypt (pgcrypto) du PIN 4 chiffres
   phone         text,                             -- sert au reset PIN (admin)
   active        boolean not null default true,
-  created_at    timestamptz not null default now(),
-  unique (shop_id, pin_hash)                       -- un PIN unique par boutique
+  created_at    timestamptz not null default now()
+  -- NB : PAS de `unique (shop_id, pin_hash)` — bcrypt sale chaque hash, deux PIN
+  -- identiques ne collisionnent donc jamais. L'unicité du PIN par boutique est
+  -- imposée applicativement (scan bcrypt) dans auth_signup/auth_add_staff (0004).
 );
-create index users_shop_idx on public.users (shop_id);
+create index users_shop_idx on public.users (shop_id);   -- login : scan des users d'une boutique
 
 -- ========= Produits =========
 create table public.products (

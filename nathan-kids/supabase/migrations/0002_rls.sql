@@ -3,8 +3,12 @@
 -- ----------------------------------------------------------------------------
 -- Principe (ARCHITECTURE.md §2/§7) : chaque requête d'un utilisateur authentifié
 -- est filtrée par SA boutique. Le `shop_id` vient TOUJOURS du JWT, jamais du
--- client. Le JWT porte les claims `shop_id`, `user_id`, `role` (émis par la
--- couche Auth PIN — Edge Function, cf. README).
+-- client. Le JWT porte les claims `shop_id`, `user_id`, `user_role` (émis par la
+-- couche Auth PIN, cf. README).
+--
+-- NB : le claim standard `role` est réservé par Supabase au rôle Postgres
+-- (`authenticated`/`anon`) ; le rôle APPLICATIF (admin/staff) est donc porté par
+-- un claim distinct `user_role`.
 --
 -- Les fonctions métier (0003) sont SECURITY DEFINER et re-filtrent explicitement
 -- par `auth_shop_id()` ; ces politiques protègent les accès directs via PostgREST.
@@ -34,7 +38,7 @@ returns text
 language sql
 stable
 as $$
-  select coalesce(auth.jwt() ->> 'role', '');
+  select coalesce(auth.jwt() ->> 'user_role', '');
 $$;
 
 create or replace function public.is_admin()

@@ -16,6 +16,7 @@ métier (fonctions atomiques `finalize_sale`, `pay_credit`, `restock`…).
 | `supabase/migrations/0001_init.sql` | Schéma PostgreSQL complet (DDL de `DATA_MODEL.md`). |
 | `supabase/migrations/0002_rls.sql`  | Row-Level Security multi-tenant + finances réservées à l'admin + vue `products_api` (masquage `cost`/marge pour `staff`). |
 | `supabase/migrations/0003_functions.sql` | Fonctions métier **atomiques** (RPC) transcrites de `BUSINESS_LOGIC.md`. |
+| `supabase/migrations/0004_auth.sql` | Auth PIN (cœur SQL) : signup/login/reset, PIN **bcrypt** (pgcrypto), rôles, pointage auto (`BUSINESS_LOGIC.md §9`). |
 | `supabase/seed/seed.sql` | Boutique NATHAN KIDS + admin Mme Silué + comptes + 12 produits du proto. |
 
 ## Modèle retenu
@@ -32,7 +33,7 @@ Chaque table métier porte `shop_id`. Les politiques RLS filtrent par
 `auth_shop_id()` = claim `shop_id` du JWT. **Le `shop_id` n'est jamais transmis
 par le client** ; il est déduit du token (voir `auth_shop_id()`, `auth_user_id()`,
 `auth_role()`, `is_admin()` dans `0002_rls.sql`). Le JWT porte `shop_id`,
-`user_id`, `role` — émis par la couche Auth PIN (voir « Suite » ci-dessous).
+`user_id`, `user_role` — émis par la couche Auth PIN (voir « Suite » ci-dessous).
 
 ### Rôles & finances
 
@@ -59,7 +60,7 @@ par le client** ; il est déduit du token (voir `auth_shop_id()`, `auth_user_id(
 
 ```http
 POST /rest/v1/rpc/finalize_sale
-Authorization: Bearer <access_token>   # claims: shop_id, user_id, role
+Authorization: Bearer <access_token>   # claims: shop_id, user_id, user_role (+ role=authenticated)
 Content-Type: application/json
 
 { "p_lines": [ { "productId": "…", "qty": 2 } ],
@@ -76,6 +77,7 @@ Dans le **SQL Editor** Supabase (ou `psql`), exécuter **dans l'ordre** :
 supabase/migrations/0001_init.sql
 supabase/migrations/0002_rls.sql
 supabase/migrations/0003_functions.sql
+supabase/migrations/0004_auth.sql
 supabase/seed/seed.sql        # facultatif (démo)
 ```
 
@@ -97,20 +99,36 @@ votre workflow).
 > `accounts.balance` depuis les journaux et alerter en cas d'écart
 > (ARCHITECTURE.md §5).
 
-## Suite (non inclus dans cette fondation)
+## Auth PIN (0004_auth.sql)
 
-Ces briques nécessitent un runtime qui émet/valide les JWT — à implémenter
-ensuite, en s'appuyant sur ce socle :
+Cœur SQL de l'authentification (`BUSINESS_LOGIC.md §9`), testé :
 
-1. **Auth PIN** (Edge Functions) : `signup`/`login`/`refresh`/`reset-pin`, PIN
-   **haché** (bcrypt/argon2), anti-brute-force, JWT court portant `shop_id`,
-   `user_id`, `role`, ouverture d'`attendance_session` au login `staff`, OTP SMS
-   au reset (ARCHITECTURE.md §3).
-2. **Endpoints REST restants** d'`API_SPEC.md` non couverts par PostgREST/RPC
-   (agrégats : `GET /sales/daily`, `GET /sync`).
+| Fonction | API_SPEC | Rôle |
+|---|---|---|
+| `auth_signup(shopName, owner, phone, pin)` | `POST /auth/signup` | Crée boutique + admin + comptes ; renvoie l'identité. |
+| `auth_login(shopId, pin)` | `POST /auth/login` | PIN comparé admin puis staff (bcrypt) ; ouvre une présence si `staff`. |
+| `auth_add_staff(name, pin)` | `POST /staff` | Admin ; refuse un PIN déjà pris (`conflict`). |
+| `auth_remove_staff(userId)` | `DELETE /staff/:id` | Admin ; désactive (garde l'historique). |
+| `auth_reset_pin(shopId, step, phone, newPin)` | `POST /auth/reset-pin` | Vérifie le téléphone admin puis pose le PIN. |
+| `attendance_logout()` | `POST /attendance/logout` | Clôt la présence de l'utilisateur courant. |
+
+Le PIN est **bcrypt** (`pgcrypto`). bcrypt salant chaque hash, l'unicité du PIN
+et le « login par PIN » se font par **balayage bcrypt** des utilisateurs de la
+boutique (et non via une clé SQL) — d'où l'absence de `unique(shop_id, pin_hash)`.
+
+> Ce que la couche Next.js ajoute par-dessus : appeler ces fonctions puis
+> **signer le JWT** (HS256, secret Supabase) portant `shop_id`/`user_id`/`user_role`
+> (+ `role='authenticated'`), rafraîchir les tokens, et le **rate-limiting**
+> anti-brute-force sur `/auth/*`. L'OTP SMS au reset reste à brancher (ARCHITECTURE.md §3).
+
+## Suite
+
+1. **Couche Next.js / API** (en cours) : routes `/api/auth/*` signant le JWT,
+   client Supabase par token, proxy des RPC ci-dessus.
+2. **Agrégats REST** non couverts par PostgREST/RPC : `GET /sales/daily`, `GET /sync`.
 3. **Offline-first** : outbox client + `Idempotency-Key` (déjà géré côté vente
    via `p_idempotency_key`) + pull incrémental `/sync` (ARCHITECTURE.md §4).
-4. **Front** : recâbler l'UX du prototype (`Nathan Kids Stock.dc.html`) sur l'API.
+4. **Front PWA** : recâbler l'UX du prototype (`Nathan Kids Stock.dc.html`) sur l'API.
 
 ## Références
 
