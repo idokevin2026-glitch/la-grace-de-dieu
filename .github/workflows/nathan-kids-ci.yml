@@ -1,0 +1,65 @@
+name: nathan-kids · migrations
+
+# Valide que TOUTES les migrations (+ seed) s'appliquent proprement, dans
+# l'ordre, sur un PostgreSQL neuf. N'affecte pas le site La Grâce de Dieu :
+# ne se déclenche que sur les changements dans nathan-kids/supabase/**.
+
+on:
+  push:
+    paths:
+      - "nathan-kids/supabase/**"
+      - ".github/workflows/nathan-kids-ci.yml"
+  pull_request:
+    paths:
+      - "nathan-kids/supabase/**"
+      - ".github/workflows/nathan-kids-ci.yml"
+
+jobs:
+  migrations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: nk
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Créer la base
+        run: psql -d postgres -c "create database nk;"
+
+      - name: Bootstrap (objets fournis par Supabase)
+        run: psql -v ON_ERROR_STOP=1 -f nathan-kids/supabase/ci/bootstrap.sql
+
+      - name: Appliquer les migrations (dans l'ordre)
+        run: |
+          set -e
+          for f in nathan-kids/supabase/migrations/*.sql; do
+            echo "== $f =="
+            psql -v ON_ERROR_STOP=1 -f "$f"
+          done
+
+      - name: Appliquer le seed
+        run: psql -v ON_ERROR_STOP=1 -f nathan-kids/supabase/seed/seed.sql
+
+      - name: Vérifier les fonctions RPC clés
+        run: |
+          psql -v ON_ERROR_STOP=1 -c "
+            select proname from pg_proc
+             where proname in ('finalize_sale','pay_credit','restock','adjust_stock',
+                               'inventory_count','money_move','auth_login','auth_signup',
+                               'sales_daily','sync_since','rate_check','refresh_rotate')
+             order by proname;"

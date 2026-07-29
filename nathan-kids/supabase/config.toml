@@ -1,0 +1,36 @@
+# Configuration Supabase CLI — projet NATHAN KIDS
+# Usage local : depuis `nathan-kids/`, `supabase start` puis `supabase db reset`
+# (applique migrations/ dans l'ordre + seed/). Hébergement cible recommandé :
+# Supabase Cloud, région EU (Paris/Francfort) — sauvegardes quotidiennes auto.
+
+project_id = "nathan-kids"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed/seed.sql"]
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+# L'authentification applicative est par PIN (Edge Function `auth`) ; l'auth
+# email/password native de Supabase n'est pas utilisée par le front NATHAN KIDS.
+site_url = "http://localhost:3000"
+
+# Edge Function d'auth : /auth/* est PRÉ-AUTH => pas de vérification de JWT.
+[functions.auth]
+verify_jwt = false
