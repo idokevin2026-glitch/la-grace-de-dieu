@@ -67,7 +67,14 @@ const NK = (() => {
   async function authCall(route, body) {
     const res = await fetch(`${CFG.FUNCTIONS_URL}/auth${route}`, {
       method: "POST",
-      headers: { "content-type": "application/json", apikey: CFG.SUPABASE_ANON_KEY },
+      headers: {
+        "content-type": "application/json",
+        apikey: CFG.SUPABASE_ANON_KEY,
+        // La clé anon est un JWT valide : on l'envoie aussi en Authorization pour
+        // que l'appel passe même si l'Edge Function garde « Verify JWT » activé
+        // (les routes /auth/* restent pré-connexion, la fonction fait sa propre logique).
+        Authorization: `Bearer ${CFG.SUPABASE_ANON_KEY}`,
+      },
       body: JSON.stringify(body),
     });
     const data = await res.json().catch(() => ({}));
