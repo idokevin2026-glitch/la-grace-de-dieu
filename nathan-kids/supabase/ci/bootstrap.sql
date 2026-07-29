@@ -6,6 +6,11 @@
 
 create schema if not exists auth;
 
+-- Mirroir de Supabase : pgcrypto vit dans le schéma `extensions` (pas public).
+-- Permet à la CI de tester le vrai search_path des fonctions d'auth.
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
+
 create or replace function auth.jwt()
 returns jsonb
 language sql
