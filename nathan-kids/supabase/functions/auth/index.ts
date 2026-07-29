@@ -60,6 +60,51 @@ function clientIp(req: Request): string {
   return (xff ? xff.split(",")[0] : req.headers.get("x-real-ip") || "unknown").trim();
 }
 
+// Code OTP à 6 chiffres, tiré d'une source cryptographique.
+function genOtp(): string {
+  const a = new Uint32Array(1);
+  crypto.getRandomValues(a);
+  return String(a[0] % 1_000_000).padStart(6, "0");
+}
+
+// Envoi SMS — agnostique du fournisseur (dégradation gracieuse si non configuré).
+//   SMS_PROVIDER = "twilio" | "generic" | (vide => non délivré)
+//   twilio  : TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM
+//   generic : SMS_WEBHOOK_URL (+ SMS_WEBHOOK_TOKEN) — POST {to,text} (Orange/MTN…)
+async function sendSMS(to: string, text: string): Promise<boolean> {
+  const provider = (Deno.env.get("SMS_PROVIDER") || "").toLowerCase();
+  try {
+    if (provider === "twilio") {
+      const sid = Deno.env.get("TWILIO_ACCOUNT_SID")!;
+      const token = Deno.env.get("TWILIO_AUTH_TOKEN")!;
+      const from = Deno.env.get("TWILIO_FROM")!;
+      const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+        method: "POST",
+        headers: {
+          Authorization: "Basic " + btoa(`${sid}:${token}`),
+          "content-type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({ To: to, From: from, Body: text }),
+      });
+      return res.ok;
+    }
+    if (provider === "generic") {
+      const url = Deno.env.get("SMS_WEBHOOK_URL");
+      if (!url) return false;
+      const tok = Deno.env.get("SMS_WEBHOOK_TOKEN");
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json", ...(tok ? { Authorization: `Bearer ${tok}` } : {}) },
+        body: JSON.stringify({ to, text }),
+      });
+      return res.ok;
+    }
+  } catch {
+    return false;
+  }
+  return false; // aucun fournisseur configuré => à brancher en production
+}
+
 /** Appelle une fonction SQL via PostgREST RPC avec la clé service-role. */
 async function rpc(fn: string, args: Record<string, unknown>) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
@@ -243,23 +288,54 @@ Deno.serve(async (req) => {
       }
 
       case "/reset-pin": {
-        // Anti-brute-force renforcé sur le reset (fenêtre 15 min).
+        // Reset par OTP SMS (0008_otp.sql). Anti-brute-force (fenêtre 15 min).
         const key = `reset:${clientIp(req)}:${body.shopId}`;
         const allowed = await rpc("rate_check", { p_key: key, p_max: 5, p_window_sec: 900, p_lock_sec: 900 });
         if (allowed === false) {
           return apiError("too_many_attempts", "Trop de tentatives. Réessayez plus tard.", 429);
         }
-        const r = await rpc("auth_reset_pin", {
-          p_shop_id: body.shopId,
-          p_step: body.step,
-          p_phone: body.phone,
-          p_new_pin: body.newPin ?? null,
-        });
+
+        // Étape 1 : envoi du code au numéro admin enregistré.
+        if (body.step === "request") {
+          const code = genOtp();
+          const req0: any = await rpc("otp_request", {
+            p_shop: body.shopId,
+            p_purpose: "pin_reset",
+            p_phone: body.phone,
+            p_code_hash: await sha256hex(`${body.shopId}:${code}`),
+            p_ttl_sec: 600, // 10 min
+          });
+          if (!req0 || req0.ok !== true) {
+            // Ne pas révéler si le numéro correspond (anti-énumération).
+            return json({ ok: true, delivered: false });
+          }
+          const delivered = await sendSMS(req0.phone, `NATHAN KIDS : votre code de réinitialisation est ${code} (valable 10 min).`);
+          return json({ ok: true, delivered });
+        }
+
+        // Étape 2 : vérification du code puis pose du nouveau PIN.
         if (body.step === "set") {
+          const v: any = await rpc("otp_verify", {
+            p_shop: body.shopId,
+            p_purpose: "pin_reset",
+            p_code_hash: await sha256hex(`${body.shopId}:${body.code ?? ""}`),
+          });
+          if (!v || v.ok !== true) {
+            return apiError("invalid_pin", `code ${v?.error ?? "invalide"}`, 401);
+          }
+          // Le code est validé : on pose le PIN (auth_reset_pin re-vérifie le tel).
+          const r = await rpc("auth_reset_pin", {
+            p_shop_id: body.shopId,
+            p_step: "set",
+            p_phone: body.phone,
+            p_new_pin: body.newPin ?? null,
+          });
           await rpc("rate_reset", { p_key: key }).catch(() => {});
           await rpc("log_event", { p_event: "pin_reset", p_detail: { ip: clientIp(req) }, p_shop: body.shopId }).catch(() => {});
+          return json(r);
         }
-        return json(r);
+
+        return apiError("validation_error", "step invalide (request|set)", 400, "step");
       }
 
       default:

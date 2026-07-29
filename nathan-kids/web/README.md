@@ -78,5 +78,6 @@ recouvrement de crédits, fiche du jour avec **export Excel (CSV)** et **PDF**
 Modules utilitaires testés (Node) : `js/barcode.js` (EAN-13 + clé de contrôle,
 `js/barcode.test.js`) et `js/api.js` (outbox offline, `js/api.test.js`).
 
-Compléments restants : durcissement prod (rate-limit `/auth/*`, OTP SMS au reset,
-rotation des refresh tokens).
+Sécurité en place : rate-limit `/auth/*`, journal d'audit, refresh tokens à
+rotation, et reset du PIN par **OTP SMS** (écran « Code oublié ? »). Il ne reste
+qu'à brancher un fournisseur SMS via les secrets de l'Edge Function.

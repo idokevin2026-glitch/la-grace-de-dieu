@@ -87,6 +87,7 @@
         <button class="link" id="toggle-mode">${
           mode === "signup" ? "← J'ai déjà un compte" : "Première utilisation ? Créer la boutique"
         }</button>
+        ${mode === "login" ? '<button class="link" id="forgot">Code oublié ?</button>' : ""}
       </div>`;
 
     const dots = $("#pin-dots");
@@ -146,6 +147,57 @@
       if (pin.length === 4 && k !== "OK") setTimeout(submit, 120);
     };
     $("#toggle-mode").onclick = () => renderAuth(mode === "signup" ? "login" : "signup");
+    const forgot = $("#forgot");
+    if (forgot) forgot.onclick = renderReset;
+  }
+
+  // Réinitialisation du PIN par OTP SMS (2 étapes : envoi du code, puis pose).
+  function renderReset() {
+    const shop = NK.getShop();
+    app.innerHTML = `
+      <div class="auth">
+        <div class="brand"><span class="logo">🔑</span><h1>Code oublié</h1><p>Un code SMS sera envoyé au numéro de l'administratrice.</p></div>
+        <div class="signup-fields">
+          ${shop ? "" : '<input id="rs-shop" placeholder="Identifiant boutique (shopId)"/>'}
+          <input id="rs-phone" placeholder="Téléphone de l'admin (+225…)"/>
+          <button class="primary big" id="rs-send">Envoyer le code</button>
+        </div>
+        <div class="signup-fields" id="rs-step2" style="display:none">
+          <input id="rs-code" placeholder="Code reçu (6 chiffres)" inputmode="numeric" maxlength="6"/>
+          <input id="rs-pin" placeholder="Nouveau code PIN (4 chiffres)" inputmode="numeric" maxlength="4"/>
+          <button class="primary big" id="rs-set">Valider le nouveau code</button>
+        </div>
+        <button class="link" id="rs-back">← Retour</button>
+      </div>`;
+    const shopId = () => (shop ? shop.id : ($("#rs-shop") ? $("#rs-shop").value.trim() : ""));
+    $("#rs-back").onclick = () => renderAuth("login");
+    $("#rs-send").onclick = async () => {
+      const sid = shopId();
+      const phone = $("#rs-phone").value.trim();
+      if (!sid || !phone) return toast("Boutique et téléphone requis", "err");
+      if (!shop) NK.setShop({ id: sid });
+      try {
+        const r = await NK.auth.resetPin({ shopId: sid, step: "request", phone });
+        $("#rs-step2").style.display = "grid";
+        toast(r.delivered ? "Code envoyé par SMS ✓" : "Si le numéro correspond, un code a été envoyé.");
+      } catch (e) {
+        toast(errMsg(e), "err");
+      }
+    };
+    $("#rs-set").onclick = async () => {
+      const sid = shopId();
+      const phone = $("#rs-phone").value.trim();
+      const code = $("#rs-code").value.trim();
+      const newPin = $("#rs-pin").value.trim();
+      if (!/^\d{4}$/.test(newPin)) return toast("Le PIN doit faire 4 chiffres", "err");
+      try {
+        await NK.auth.resetPin({ shopId: sid, step: "set", phone, code, newPin });
+        toast("Code réinitialisé ✓ Connectez-vous.");
+        renderAuth("login");
+      } catch (e) {
+        toast(errMsg(e), "err");
+      }
+    };
   }
 
   // ========================================================================
