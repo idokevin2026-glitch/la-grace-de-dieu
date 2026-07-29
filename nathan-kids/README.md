@@ -23,9 +23,9 @@ vers **Supabase (PostgreSQL + PostgREST + RLS)** + une **PWA** installable.
 
 Répertoires : **`supabase/`** (migrations + Edge Function `auth`) et **`web/`**
 (PWA — voir `web/README.md`). Inclus aussi : inventaire physique multi-produits,
-scan code-barres (EAN-13 valide), export PDF/Excel, **rate-limiting `/auth/*`**
-et **journal d'audit**. Restant pour la prod : **OTP SMS** au reset et
-**rotation/révocation des refresh tokens** (services externes).
+scan code-barres (EAN-13 valide), export PDF/Excel, **rate-limiting `/auth/*`**,
+**journal d'audit** et **refresh tokens à rotation/révocation**. Restant pour la
+prod : **OTP SMS** au reset (service SMS externe).
 
 ## Ce qui est livré
 
@@ -37,6 +37,7 @@ et **journal d'audit**. Restant pour la prod : **OTP SMS** au reset et
 | `supabase/migrations/0004_auth.sql` | Auth PIN (cœur SQL) : signup/login/reset, PIN **bcrypt** (pgcrypto), rôles, pointage auto (`BUSINESS_LOGIC.md §9`). |
 | `supabase/migrations/0005_aggregates.sql` | Agrégats `sales_daily` (fiche du jour) + `sync_since` (pull offline). |
 | `supabase/migrations/0006_security.sql` | Journal d'audit (déclencheurs) + limiteur anti-brute-force (`rate_check`) — ARCHITECTURE.md §7. |
+| `supabase/migrations/0007_refresh_tokens.sql` | Refresh tokens opaques à **rotation** + révocation + détection de rejeu. |
 | `supabase/functions/auth/` | Edge Function : login PIN → signature du JWT Supabase (voir `functions/README.md`). |
 | `supabase/seed/seed.sql` | Boutique NATHAN KIDS + admin Mme Silué + comptes + 12 produits du proto. |
 | `web/` | **PWA** installable (JS pur, offline-first) recâblée sur l'API (voir `web/README.md`). |

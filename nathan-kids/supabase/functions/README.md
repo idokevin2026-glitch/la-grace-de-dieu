@@ -31,7 +31,8 @@ supabase functions deploy auth --no-verify-jwt   # /auth/* est pré-auth
 |---|---|---|
 | `/auth/signup` | `{ shopName, owner, phone, pin }` | `201` `{ accessToken, refreshToken, user, shop }` |
 | `/auth/login` | `{ shopId, pin }` | `200` `{ accessToken, refreshToken, user, attendanceSessionId? }` |
-| `/auth/refresh` | `{ refreshToken }` | `200` `{ accessToken }` |
+| `/auth/refresh` | `{ refreshToken }` | `200` `{ accessToken, refreshToken }` (rotation) |
+| `/auth/logout` | `{ refreshToken }` | `200` `{ ok }` (révoque le refresh) |
 | `/auth/reset-pin` | `{ shopId, step, phone, newPin? }` | `200` `{ ok }` |
 
 ### Claims du token d'accès
@@ -53,11 +54,15 @@ applicatif lu par la RLS (`auth_role()` → `is_admin()`).
 - **Journal d'audit** (`auth_audit`) : `login_ok`/`login_fail`/`pin_reset`
   (par l'Edge Function) + recouvrement de crédit, mouvements de caisse et
   désactivation de vendeuse (déclencheurs SQL). Lecture réservée à l'admin.
+- **Refresh tokens à rotation** (`0007_refresh_tokens.sql`) : jetons **opaques**
+  stockés hachés (SHA-256) côté serveur. Chaque `/refresh` tourne le jeton
+  (révoque l'ancien, en émet un nouveau) ; un rejeu d'un jeton déjà tourné
+  **coupe toute la session** (reuse detection) ; `/logout` révoque ; un
+  utilisateur désactivé voit sa session invalidée. Le client sérialise les
+  rafraîchissements (single-flight) pour éviter les faux positifs de rejeu.
 
 ### À durcir encore (ARCHITECTURE.md §3/§7)
 
-- **Refresh tokens** : ici stateless (non révocables). Passer à un stockage
-  serveur + rotation.
 - **OTP SMS** au reset (remplacer la simple correspondance du téléphone) —
   Twilio ou passerelle locale (Orange/MTN).
 

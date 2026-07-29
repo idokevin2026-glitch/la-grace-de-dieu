@@ -84,6 +84,24 @@ const NK = (() => {
     };
   }
 
+  // Rafraîchissement « single-flight » : une seule rotation à la fois, partagée
+  // par toutes les requêtes concurrentes (sinon un 2e /refresh avec l'ancien
+  // jeton déclencherait la détection de rejeu et couperait la session).
+  let refreshing = null;
+  function doRefresh() {
+    if (!refreshing) {
+      refreshing = authCall("/refresh", { refreshToken: tokens.refreshToken })
+        .then((r) => {
+          setSession(r); // r = { accessToken, refreshToken } (rotation)
+          return r;
+        })
+        .finally(() => {
+          refreshing = null;
+        });
+    }
+    return refreshing;
+  }
+
   // Appel PostgREST avec rafraîchissement transparent du token sur 401.
   async function rest(method, path, body, _retried) {
     const res = await fetch(`${CFG.SUPABASE_URL}/rest/v1/${path}`, {
@@ -93,8 +111,7 @@ const NK = (() => {
     });
     if (res.status === 401 && tokens && tokens.refreshToken && !_retried) {
       try {
-        const r = await authCall("/refresh", { refreshToken: tokens.refreshToken });
-        setSession(r);
+        await doRefresh();
         return rest(method, path, body, true);
       } catch {
         logoutLocal();
@@ -127,6 +144,14 @@ const NK = (() => {
     async logout() {
       try {
         if (navigator.onLine) await rpc("attendance_logout", {});
+      } catch {
+        /* ignore */
+      }
+      // Révoque le refresh token côté serveur (rotation/révocation).
+      try {
+        if (navigator.onLine && tokens && tokens.refreshToken) {
+          await authCall("/logout", { refreshToken: tokens.refreshToken });
+        }
       } catch {
         /* ignore */
       }

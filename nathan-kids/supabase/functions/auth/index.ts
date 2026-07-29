@@ -19,11 +19,7 @@
 // et une rotation/stockage des refresh tokens (ici stateless, non révocables).
 // ============================================================================
 
-import {
-  create,
-  verify,
-  getNumericDate,
-} from "https://deno.land/x/djwt@v3.0.2/mod.ts";
+import { create, getNumericDate } from "https://deno.land/x/djwt@v3.0.2/mod.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -121,25 +117,37 @@ async function signAccess(identity: {
   );
 }
 
-async function signRefresh(identity: { shopId: string; userId: string; role: string }) {
-  return await create(
-    { alg: "HS256", typ: "JWT" },
-    {
-      sub: identity.userId,
-      typ: "refresh",
-      shop_id: identity.shopId,
-      user_id: identity.userId,
-      user_role: identity.role,
-      exp: getNumericDate(REFRESH_TTL_SEC),
-    },
-    key,
-  );
+// ---- Refresh tokens OPAQUES (stockés côté serveur, avec rotation) ----------
+// Un jeton aléatoire de 256 bits ; seul son SHA-256 est conservé en base
+// (0007_refresh_tokens.sql). À chaque /refresh il est tourné (révoqué + ré-émis)
+// et un rejeu d'un jeton déjà tourné coupe toute la session (reuse detection).
+function genRefresh(): string {
+  const a = new Uint8Array(32);
+  crypto.getRandomValues(a);
+  return btoa(String.fromCharCode(...a)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function sha256hex(s: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// Émet un refresh token (nouvelle session) et le persiste ; renvoie le jeton clair.
+async function issueRefresh(identity: { shopId: string; userId: string }): Promise<string> {
+  const token = genRefresh();
+  await rpc("refresh_issue", {
+    p_user: identity.userId,
+    p_shop: identity.shopId,
+    p_token_hash: await sha256hex(token),
+    p_ttl_sec: REFRESH_TTL_SEC,
+  });
+  return token;
 }
 
 async function tokensFor(identity: { shopId: string; userId: string; role: string }) {
   return {
     accessToken: await signAccess(identity),
-    refreshToken: await signRefresh(identity),
+    refreshToken: await issueRefresh(identity),
   };
 }
 
@@ -211,19 +219,27 @@ Deno.serve(async (req) => {
 
       case "/refresh": {
         if (!body.refreshToken) return apiError("unauthenticated", "refreshToken manquant", 401);
-        let payload: any;
-        try {
-          payload = await verify(body.refreshToken, key);
-        } catch {
-          return apiError("unauthenticated", "refresh invalide/expiré", 401);
+        // Rotation : révoque l'ancien, émet un nouveau refresh. Un rejeu d'un
+        // jeton déjà tourné coupe toute la session (reuse detection, en base).
+        const newToken = genRefresh();
+        const res: any = await rpc("refresh_rotate", {
+          p_old_hash: await sha256hex(body.refreshToken),
+          p_new_hash: await sha256hex(newToken),
+          p_ttl_sec: REFRESH_TTL_SEC,
+        });
+        if (!res || res.ok !== true) {
+          return apiError("unauthenticated", `refresh ${res?.error ?? "invalide"}`, 401);
         }
-        if (payload.typ !== "refresh") return apiError("unauthenticated", "type de token invalide", 401);
-        const identity = {
-          shopId: payload.shop_id,
-          userId: payload.user_id,
-          role: payload.user_role,
-        };
-        return json({ accessToken: await signAccess(identity) });
+        const identity = { shopId: res.shopId, userId: res.userId, role: res.role };
+        return json({ accessToken: await signAccess(identity), refreshToken: newToken });
+      }
+
+      case "/logout": {
+        // Révoque le refresh présenté (déconnexion applicative).
+        if (body.refreshToken) {
+          await rpc("refresh_revoke", { p_token_hash: await sha256hex(body.refreshToken) }).catch(() => {});
+        }
+        return json({ ok: true });
       }
 
       case "/reset-pin": {
