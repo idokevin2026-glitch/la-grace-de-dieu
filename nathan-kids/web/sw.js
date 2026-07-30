@@ -1,8 +1,10 @@
 // NATHAN KIDS — Service Worker : coquille hors-ligne (app shell)
-// Stratégie : cache-first pour les fichiers statiques de l'app ; le RÉSEAU
-// n'est jamais mis en cache pour les appels API (données = toujours frais /
-// gérés par l'outbox côté app). Voir js/api.js.
-const CACHE = "nk-shell-v3";
+// Stratégie : RÉSEAU D'ABORD (network-first) pour les fichiers de l'app →
+// quand il y a internet, l'utilisateur reçoit TOUJOURS la dernière version
+// déployée (fini le cache figé). Hors ligne, on sert la dernière copie mise en
+// cache. Les appels API (Supabase) ne sont jamais interceptés (données gérées
+// par l'outbox côté app). Voir js/api.js.
+const CACHE = "nk-shell-v4";
 const SHELL = [
   "./",
   "./index.html",
@@ -40,18 +42,15 @@ self.addEventListener("fetch", (e) => {
   const url = new URL(req.url);
   // Appels API (Supabase) : réseau direct, pas de cache.
   if (/supabase\.co|\/rest\/v1\/|\/functions\/v1\//.test(url.href)) return;
-  // Statique : cache d'abord, repli réseau (et mise en cache au passage).
+  // Fichiers de l'app : RÉSEAU D'ABORD (met à jour le cache au passage),
+  // repli sur le cache si hors ligne, puis sur index.html en dernier recours.
   e.respondWith(
-    caches.match(req).then(
-      (hit) =>
-        hit ||
-        fetch(req)
-          .then((res) => {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(req, copy));
-            return res;
-          })
-          .catch(() => caches.match("./index.html")),
-    ),
+    fetch(req)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(req, copy));
+        return res;
+      })
+      .catch(() => caches.match(req).then((hit) => hit || caches.match("./index.html"))),
   );
 });
