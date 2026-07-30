@@ -25,13 +25,26 @@ bien démarrer. *(À imprimer ou à garder sur le téléphone.)*
 - Sur un article : **＋ Réassort** (marchandise reçue) ou **± Ajuster** (correction).
 - **📋 Inventaire** : compter physiquement le stock ; seuls les écarts sont enregistrés.
 
+## ➕ Le menu « Plus »
+- L'onglet **Plus** (en bas à droite) regroupe les écrans secondaires : **Crédits**, **Mouvements de stock**, et — pour l'admin — **Pointage vendeuses**, **Caisse & Banque**, **Équipe**.
+
+## 🌐 Français / Anglais
+- Le petit bouton **FR / EN** (en haut) bascule toute l'application entre le français et l'anglais.
+
 ## 📕 Crédits clients
-- Onglet **Crédits** : liste des clients qui doivent de l'argent.
+- Menu **Plus → Crédits** : liste des clients qui doivent de l'argent.
 - Quand un client paie : **Marquer payé** → la caisse est créditée automatiquement.
 
-## 📊 Fiche du jour
-- Onglet **Journée** (vendeuse) ou depuis l'accueil : recette, ventes, bénéfice (admin), articles vendus.
-- Boutons **Excel (CSV)** et **PDF** pour exporter/imprimer la journée.
+## 🔄 Mouvements de stock
+- Menu **Plus → Mouvements de stock** : le journal de toutes les **entrées** (réassort, inventaire) et **sorties** (ventes), avec l'heure et la raison.
+
+## ⏱️ Pointage vendeuses *(admin uniquement)*
+- Menu **Plus → Pointage vendeuses** : pour chaque vendeuse, l'heure d'**arrivée** (connexion), de **départ** (déconnexion) et le **temps de présence** de la journée.
+- Une vendeuse encore connectée affiche **« en cours »**.
+
+## 📊 Rapports
+- Onglet **Rapports** : recette et bénéfice (admin) du jour, nombre de ventes, et le graphique **« Cette semaine »** (chiffre d'affaires des 7 derniers jours + meilleur jour).
+- Touchez la carte **Fiche du jour** pour le détail : recette, ventes, bénéfice (admin), modes de paiement, articles vendus, opérations — avec boutons **Excel (CSV)** et **PDF**.
 
 ## 💰 Caisse & Banque *(admin uniquement)*
 - Soldes **Caisse (espèces)** et **Banque** (Wave/OM/carte).
