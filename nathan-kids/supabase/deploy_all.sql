@@ -1,12 +1,12 @@
 -- ============================================================================
 -- NATHAN KIDS — Script de déploiement TOUT-EN-UN (Supabase SQL Editor)
 -- ----------------------------------------------------------------------------
--- Concaténation, DANS L'ORDRE, des 8 migrations + le seed de démo.
+-- Concaténation, DANS L'ORDRE, des migrations + le seed de démo.
 -- À coller tel quel dans le SQL Editor d'un projet Supabase NEUF, puis Run.
 --
--- NB : sur Supabase, le schéma `auth`, la fonction `auth.jwt()` et les rôles
--- anon/authenticated/service_role existent déjà — NE PAS exécuter
--- ci/bootstrap.sql (réservé aux tests sur PostgreSQL vanilla).
+-- NB : sur Supabase, le schéma `auth`, la fonction `auth.jwt()`, les rôles
+-- anon/authenticated/service_role et pgcrypto (schéma `extensions`) existent
+-- déjà — NE PAS exécuter ci/bootstrap.sql (réservé aux tests hors Supabase).
 -- Généré automatiquement — ne pas éditer à la main ; modifier les migrations.
 -- ============================================================================
 
@@ -853,14 +853,16 @@ returns boolean language sql immutable as $$
   select p_pin ~ '^\d{4}$';
 $$;
 
+-- NB : `set search_path = public, extensions` — sur Supabase, pgcrypto
+-- (crypt/gen_salt) vit dans le schéma `extensions`, pas `public`.
 create or replace function public.hash_pin(p_pin text)
-returns text language sql volatile as $$
+returns text language sql volatile set search_path = public, extensions as $$
   select crypt(p_pin, gen_salt('bf', 10));      -- bcrypt, coût 10
 $$;
 
 -- Vrai si un utilisateur ACTIF de la boutique possède déjà ce PIN.
 create or replace function public.pin_taken(p_shop uuid, p_pin text)
-returns boolean language sql stable as $$
+returns boolean language sql stable set search_path = public, extensions as $$
   select exists (
     select 1 from public.users
      where shop_id = p_shop and active
@@ -923,7 +925,7 @@ create or replace function public.auth_login(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions   -- crypt() est dans le schéma `extensions` (Supabase)
 as $$
 declare
   v_user    public.users%rowtype;
@@ -1717,6 +1719,26 @@ revoke all on function public.otp_request(uuid, text, text, text, integer) from 
 revoke all on function public.otp_verify(uuid, text, text)                 from public, anon, authenticated;
 grant execute on function public.otp_request(uuid, text, text, text, integer) to service_role;
 grant execute on function public.otp_verify(uuid, text, text)                 to service_role;
+
+-- ####################################################################
+-- ## migrations/0009_fix_pgcrypto_search_path.sql
+-- ####################################################################
+
+-- ============================================================================
+-- NATHAN KIDS — Migration 0009 : correctif search_path pgcrypto (Supabase)
+-- ----------------------------------------------------------------------------
+-- Sur Supabase, l'extension pgcrypto (crypt/gen_salt) est installée dans le
+-- schéma `extensions`, pas `public`. Les fonctions d'auth qui l'utilisent
+-- doivent donc inclure `extensions` dans leur search_path — sinon, à l'exécution
+-- (appel RPC via PostgREST), on obtient : « function gen_salt(...) does not exist ».
+--
+-- Idempotent : à exécuter sur une base déjà déployée avant ce correctif.
+-- (Les fresh installs ont déjà le bon search_path via 0004.)
+-- ============================================================================
+
+alter function public.hash_pin(text)          set search_path = public, extensions;
+alter function public.pin_taken(uuid, text)   set search_path = public, extensions;
+alter function public.auth_login(uuid, text)  set search_path = public, extensions;
 
 -- ####################################################################
 -- ## seed/seed.sql

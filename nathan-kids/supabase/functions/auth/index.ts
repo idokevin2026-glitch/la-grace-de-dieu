@@ -30,7 +30,9 @@ const REFRESH_TTL_SEC = 30 * 24 * 60 * 60; // 30 jours
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, content-type",
+  // Doit inclure TOUS les en-têtes envoyés par le client (dont `apikey`),
+  // sinon le navigateur bloque la requête (preflight) => « Failed to fetch ».
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, prefer",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -197,7 +199,13 @@ async function tokensFor(identity: { shopId: string; userId: string; role: strin
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  if (req.method === "OPTIONS") {
+    // Refléter les en-têtes demandés par le navigateur => aucun blocage CORS.
+    const reqHeaders = req.headers.get("access-control-request-headers");
+    return new Response("ok", {
+      headers: { ...CORS, ...(reqHeaders ? { "Access-Control-Allow-Headers": reqHeaders } : {}) },
+    });
+  }
   if (req.method !== "POST") return apiError("not_found", "méthode", 404);
 
   const path = new URL(req.url).pathname.replace(/.*\/auth/, "") || "/";

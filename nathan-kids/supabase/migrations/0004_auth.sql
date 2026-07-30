@@ -20,14 +20,16 @@ returns boolean language sql immutable as $$
   select p_pin ~ '^\d{4}$';
 $$;
 
+-- NB : `set search_path = public, extensions` — sur Supabase, pgcrypto
+-- (crypt/gen_salt) vit dans le schéma `extensions`, pas `public`.
 create or replace function public.hash_pin(p_pin text)
-returns text language sql volatile as $$
+returns text language sql volatile set search_path = public, extensions as $$
   select crypt(p_pin, gen_salt('bf', 10));      -- bcrypt, coût 10
 $$;
 
 -- Vrai si un utilisateur ACTIF de la boutique possède déjà ce PIN.
 create or replace function public.pin_taken(p_shop uuid, p_pin text)
-returns boolean language sql stable as $$
+returns boolean language sql stable set search_path = public, extensions as $$
   select exists (
     select 1 from public.users
      where shop_id = p_shop and active
@@ -90,7 +92,7 @@ create or replace function public.auth_login(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions   -- crypt() est dans le schéma `extensions` (Supabase)
 as $$
 declare
   v_user    public.users%rowtype;

@@ -280,6 +280,19 @@ const NK = (() => {
     staff: () => get("users?select=id,name,active,role&order=name.asc"),
     dailySheet: (date, tz) => rpc("sales_daily", { p_date: date, p_tz: tz || "UTC" }),
     accounts: () => get("accounts?select=kind,balance"), // admin only (RLS)
+    // Pointage : sessions de présence (avec le nom de la vendeuse par embed FK).
+    attendance: (fromISO) =>
+      get(
+        `attendance_sessions?select=id,login_at,logout_at,active,user_id,users(name)` +
+          (fromISO ? `&login_at=gte.${encodeURIComponent(fromISO)}` : "") +
+          `&order=login_at.desc`,
+      ),
+    // Journal des mouvements de stock (entrées/sorties), plus récents d'abord.
+    movements: (limit = 60) =>
+      get(`stock_movements?select=id,product_name,direction,qty,reason,created_at&order=created_at.desc&limit=${limit}`),
+    // Ventes d'une fenêtre (graphe hebdo) — total + date seulement (aucune marge exposée).
+    weekSales: (fromISO) =>
+      get(`sales?select=total,created_at&created_at=gte.${encodeURIComponent(fromISO)}&order=created_at.asc`),
     // Sync incrémental : met à jour le cache local et le curseur.
     async sync() {
       const since = localStorage.getItem(LS.since) || "1970-01-01T00:00:00Z";
@@ -287,6 +300,9 @@ const NK = (() => {
       const c = cache.read();
       if (data.products) c.products = data.products;
       if (data.accounts) c.accounts = data.accounts;
+      // Repli hors ligne pour les écrans Pointage / Mouvements (données du delta).
+      if (data.attendance) c.attendance = data.attendance;
+      if (data.stockMovements) c.stockMovements = data.stockMovements;
       cache.write(c);
       if (data.now) localStorage.setItem(LS.since, data.now);
       return data;
