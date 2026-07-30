@@ -35,6 +35,13 @@
       cartEmpty: "Panier vide — touchez un article.", checkout: "Encaisser",
       customerName: "Nom du client (obligatoire)", restock: "Réassort", adjust: "Ajuster",
       reasonSale: "Vente", reasonRestock: "Réassort", reasonAdjust: "Ajustement", reasonInv: "Inventaire",
+      deadStock: "Stock mort", deadStockSub: "Articles qui ne se vendent plus", inventoryTile: "Inventaire",
+      inventoryHintShort: "Comptage physique",
+      neverSold: "Jamais vendu", noSaleSince: "j sans vente", sinceLabel: "Sans vente depuis",
+      immobilizedRetail: "Valeur immobilisée", immobilizedCost: "dont au coût",
+      deadCount: "article(s) mort(s)", noDeadStock: "Aucun stock mort — tout tourne 🎉",
+      gestion: "Gestion", gestionSub: "Outils de suivi", disconnect: "Se déconnecter",
+      roleAdminF: "Administratrice", roleStaffF: "Vendeuse",
       noData: "—", offlineData: "Indisponible hors ligne.", byPayment: "Par mode de paiement",
       itemsSold: "Articles vendus", operations: "Opérations", exportCsv: "Excel (CSV)", exportPdf: "PDF",
       inventoryHint: "Saisissez le stock physiquement compté. Seuls les écarts sont enregistrés.",
@@ -67,6 +74,13 @@
       cartEmpty: "Empty cart — tap a product.", checkout: "Charge",
       customerName: "Customer name (required)", restock: "Restock", adjust: "Adjust",
       reasonSale: "Sale", reasonRestock: "Restock", reasonAdjust: "Adjustment", reasonInv: "Inventory",
+      deadStock: "Dead stock", deadStockSub: "Items that no longer sell", inventoryTile: "Inventory",
+      inventoryHintShort: "Physical count",
+      neverSold: "Never sold", noSaleSince: "d without sale", sinceLabel: "No sale for",
+      immobilizedRetail: "Tied-up value", immobilizedCost: "at cost",
+      deadCount: "dead item(s)", noDeadStock: "No dead stock — all moving 🎉",
+      gestion: "Management", gestionSub: "Tracking tools", disconnect: "Log out",
+      roleAdminF: "Administrator", roleStaffF: "Seller",
       noData: "—", offlineData: "Unavailable offline.", byPayment: "By payment method",
       itemsSold: "Items sold", operations: "Operations", exportCsv: "Excel (CSV)", exportPdf: "PDF",
       inventoryHint: "Enter the physically counted stock. Only differences are recorded.",
@@ -119,6 +133,7 @@
     customer: "",
     daily: null, // fiche du jour agrégée
     week: null, // agrégat 7 jours { days, sum, bestIdx, todayTotal, yestTotal }
+    deadDays: 60, // seuil « stock mort » (jours sans vente)
   };
 
   // ---- Toast ----------------------------------------------------------------
@@ -373,7 +388,7 @@
   const TAB_OF = {
     home: "home", sales: "sales", stock: "stock", inventory: "stock",
     reports: "reports", daily: "reports",
-    more: "more", credits: "more", movements: "more", attendance: "more", cash: "more", team: "more",
+    more: "more", credits: "more", movements: "more", attendance: "more", cash: "more", team: "more", dead: "more",
   };
 
   function topActions() {
@@ -414,12 +429,12 @@
     };
     const sync = $('[data-act="sync"]');
     if (sync) sync.onclick = () => refresh(true);
-    const lo = $('[data-act="logout"]');
-    if (lo)
+    document.querySelectorAll('[data-act="logout"]').forEach((lo) => {
       lo.onclick = async () => {
         await NK.auth.logout();
         renderAuth("login");
       };
+    });
     const back = $("[data-back]");
     if (back) back.onclick = () => go(back.dataset.back);
     wireLang();
@@ -1044,9 +1059,13 @@
   // ========================================================================
   function screenMore() {
     const admin = NK.isAdmin();
+    const u = NK.getUser() || {};
+    const roleLabel = admin ? t("roleAdminF") : t("roleStaffF");
     const tiles = [
-      ["credits", "📕", t("credits"), lang === "en" ? "Who owes money" : "Qui doit de l'argent", "t-credit"],
       ["movements", "🔄", t("movements"), t("movementsSub"), "t-move"],
+      ["inventory", "📋", t("inventoryTile"), t("inventoryHintShort"), "t-inv"],
+      ["dead", "🕰️", t("deadStock"), t("deadStockSub"), "t-dead"],
+      ["credits", "📕", t("credits"), lang === "en" ? "Who owes money" : "Qui doit de l'argent", "t-credit"],
     ];
     if (admin) {
       tiles.push(["attendance", "⏱️", t("attendance"), t("attendanceSub"), "t-att"]);
@@ -1055,7 +1074,13 @@
     }
     paint(
       tabHeader(t("more")),
-      `<div class="tiles">
+      `<div class="profile">
+         <div class="avatar lg">${esc(initials(u.name))}</div>
+         <div class="profile-main"><strong>${esc(u.name || "")}</strong><small>${esc(roleLabel)}${(NK.getShop() || {}).name ? " · " + esc(NK.getShop().name) : ""}</small></div>
+         <button class="logout-btn" data-act="logout">${t("disconnect")}</button>
+       </div>
+       <h3>${t("gestion")} <span class="h3-sub">· ${t("gestionSub")}</span></h3>
+       <div class="tiles">
         ${tiles
           .map(
             ([id, ic, label, sub, cls]) => `
@@ -1071,6 +1096,76 @@
     $(".content").onclick = (e) => {
       const b = e.target.closest("[data-nav]");
       if (b) go(b.dataset.nav);
+    };
+  }
+
+  // ========================================================================
+  //  STOCK MORT (articles avec du stock mais sans vente récente)
+  // ========================================================================
+  async function screenDeadStock() {
+    const admin = NK.isAdmin();
+    const days = state.deadDays || 60;
+    let times = [];
+    try {
+      times = await NK.reads.saleTimes(1000);
+    } catch {
+      times = [];
+    }
+    // 1re occurrence d'un produit (ordre décroissant) = sa dernière vente.
+    const last = {};
+    times.forEach((r) => {
+      if (r.product_id && !last[r.product_id]) last[r.product_id] = r.created_at;
+    });
+    const now = Date.now();
+    const dead = state.products
+      .filter((p) => p.stock > 0)
+      .map((p) => {
+        const ls = last[p.id] || null;
+        const daysSince = ls ? Math.floor((now - new Date(ls).getTime()) / 86400000) : null;
+        return { p, ls, daysSince };
+      })
+      .filter((d) => d.daysSince === null || d.daysSince >= days)
+      .sort((a, b) => (b.daysSince === null ? 1e9 : b.daysSince) - (a.daysSince === null ? 1e9 : a.daysSince));
+
+    const retailVal = dead.reduce((a, d) => a + d.p.price * d.p.stock, 0);
+    const costVal = dead.reduce((a, d) => a + (d.p.cost || 0) * d.p.stock, 0);
+    const chips = [30, 60, 90]
+      .map((n) => `<button class="chip ${n === days ? "on" : ""}" data-days="${n}">${n} j</button>`)
+      .join("");
+
+    const list = dead.length
+      ? dead
+          .map(
+            ({ p, daysSince }) => `
+        <div class="row">
+          <div class="row-main">
+            <strong>${esc(pn(p))}</strong>
+            <small>${daysSince === null ? t("neverSold") : `${daysSince} ${t("noSaleSince")}`} · ${fmt(p.price * p.stock)}${admin && p.cost != null ? ` · ${lang === "en" ? "cost" : "coût"} ${fmt(p.cost * p.stock)}` : ""}</small>
+          </div>
+          <span class="pill z">${p.stock}</span>
+        </div>`,
+          )
+          .join("")
+      : `<p class="muted">${t("noDeadStock")}</p>`;
+
+    paint(
+      subHeader(t("deadStock"), t("deadStockSub"), "more"),
+      `<div class="chips">${t("sinceLabel")} : ${chips}</div>
+       ${
+         dead.length
+           ? `<div class="dead-summary">
+                <div><span class="ds-v">${dead.length}</span><span class="ds-k">${t("deadCount")}</span></div>
+                <div><span class="ds-v">${fmt(retailVal)}</span><span class="ds-k">${t("immobilizedRetail")}${admin ? ` · ${fmt(costVal)} ${t("immobilizedCost")}` : ""}</span></div>
+              </div>`
+           : ""
+       }
+       <div class="list">${list}</div>`,
+    );
+    $(".chips").onclick = (e) => {
+      const b = e.target.closest("[data-days]");
+      if (!b) return;
+      state.deadDays = +b.dataset.days;
+      screenDeadStock();
     };
   }
 
@@ -1268,6 +1363,7 @@
     attendance: screenAttendance,
     cash: screenCash,
     team: screenTeam,
+    dead: screenDeadStock,
   };
   function go(id) {
     state.screen = id;

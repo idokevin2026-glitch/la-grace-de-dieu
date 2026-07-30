@@ -38,6 +38,11 @@ bien démarrer. *(À imprimer ou à garder sur le téléphone.)*
 ## 🔄 Mouvements de stock
 - Menu **Plus → Mouvements de stock** : le journal de toutes les **entrées** (réassort, inventaire) et **sorties** (ventes), avec l'heure et la raison.
 
+## 🕰️ Stock mort
+- Menu **Plus → Stock mort** : les articles **encore en stock mais qui ne se vendent plus** (aucune vente depuis 30, 60 ou 90 jours — à choisir en haut).
+- Le bandeau indique combien d'articles sont concernés et la **valeur immobilisée** (l'argent « dormant » dans ces invendus).
+- Utile pour décider des **promotions / déstockages** et éviter d'immobiliser de la trésorerie.
+
 ## ⏱️ Pointage vendeuses *(admin uniquement)*
 - Menu **Plus → Pointage vendeuses** : pour chaque vendeuse, l'heure d'**arrivée** (connexion), de **départ** (déconnexion) et le **temps de présence** de la journée.
 - Une vendeuse encore connectée affiche **« en cours »**.
