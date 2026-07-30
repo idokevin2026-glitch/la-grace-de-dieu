@@ -293,6 +293,11 @@ const NK = (() => {
     // Ventes d'une fenêtre (graphe hebdo) — total + date seulement (aucune marge exposée).
     weekSales: (fromISO) =>
       get(`sales?select=total,created_at&created_at=gte.${encodeURIComponent(fromISO)}&order=created_at.asc`),
+    // Dates de vente par produit (pour le « stock mort ») — mouvements de sortie
+    // de type vente, plus récents d'abord ; la 1re occurrence d'un produit = sa
+    // dernière vente. Aucun montant/marge exposé.
+    saleTimes: (limit = 1000) =>
+      get(`stock_movements?select=product_id,created_at&reason=eq.sale&order=created_at.desc&limit=${limit}`),
     // Sync incrémental : met à jour le cache local et le curseur.
     async sync() {
       const since = localStorage.getItem(LS.since) || "1970-01-01T00:00:00Z";
