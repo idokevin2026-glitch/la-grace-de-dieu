@@ -11,6 +11,8 @@ bien démarrer. *(À imprimer ou à garder sur le téléphone.)*
 - **Vendeuses** : accès aux **ventes** et au **stock**. Les chiffres d'argent (bénéfice, marge, caisse) sont **cachés**. La connexion d'une vendeuse enregistre automatiquement son **pointage** (heure d'arrivée).
 - **Se déconnecter** : bouton en haut à droite (la vendeuse « pointe » son départ).
 
+> 📲 **Connecter une vendeuse sur SON téléphone** : l'admin va dans **Plus → Équipe → « Copier le lien »** et l'envoie à la vendeuse (WhatsApp). Elle **ouvre le lien une seule fois** (ça enregistre la boutique sur son téléphone), puis se connecte simplement avec son **PIN**. Plus besoin de code technique à saisir.
+
 ## 🛒 Faire une vente
 1. Onglet **Vente**.
 2. **Touchez les articles** pour les ajouter au panier (ou 📷 **scannez** le code-barres).

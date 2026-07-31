@@ -46,6 +46,8 @@
       editProduct: "Modifier le produit", edit: "Modifier", scanBtn: "Scanner",
       resetPinStaff: "Réinitialiser le PIN", newPinQ: "Nouveau code PIN (4 chiffres) ?", pinReset: "PIN réinitialisé ✓",
       todaySalesCount: "Ventes du jour", itemsSoldToday: "Articles vendus", myStock: "Le stock", startSale: "Démarrer une vente",
+      shareTitle: "Lien de connexion des vendeuses", shareHint: "Envoyez ce lien à vos vendeuses (WhatsApp). Elles l'ouvrent une fois, puis se connectent avec leur PIN.",
+      copy: "Copier le lien", copied: "Lien copié ✓", shareBtn: "Partager",
       noData: "—", offlineData: "Indisponible hors ligne.", byPayment: "Par mode de paiement",
       itemsSold: "Articles vendus", operations: "Opérations", exportCsv: "Excel (CSV)", exportPdf: "PDF",
       inventoryHint: "Saisissez le stock physiquement compté. Seuls les écarts sont enregistrés.",
@@ -89,6 +91,8 @@
       editProduct: "Edit product", edit: "Edit", scanBtn: "Scan",
       resetPinStaff: "Reset PIN", newPinQ: "New PIN code (4 digits)?", pinReset: "PIN reset ✓",
       todaySalesCount: "Today's sales", itemsSoldToday: "Items sold", myStock: "Stock", startSale: "Start a sale",
+      shareTitle: "Sellers login link", shareHint: "Send this link to your sellers (WhatsApp). They open it once, then log in with their PIN.",
+      copy: "Copy link", copied: "Link copied ✓", shareBtn: "Share",
       noData: "—", offlineData: "Unavailable offline.", byPayment: "By payment method",
       itemsSold: "Items sold", operations: "Operations", exportCsv: "Excel (CSV)", exportPdf: "PDF",
       inventoryHint: "Enter the physically counted stock. Only differences are recorded.",
@@ -107,6 +111,11 @@
   // Code couleur par catégorie : bleu = vêtements, rose = cosmétiques.
   const catClass = (p) =>
     p && p.category === "cosmetiques" ? "cat-cos" : p && p.category === "vetements" ? "cat-vet" : "cat-other";
+  // Lien de connexion à partager aux vendeuses (pré-remplit la boutique).
+  const shareLink = () => {
+    const id = (NK.getShop() || {}).id || "";
+    return `${location.origin}${location.pathname}?shop=${encodeURIComponent(id)}`;
+  };
 
   const fmt = (n) =>
     n == null ? t("noData") : new Intl.NumberFormat(lang === "en" ? "en-US" : "fr-FR").format(n) + " F";
@@ -1443,9 +1452,34 @@
     if (!NK.isAdmin()) return go("more");
     paint(
       subHeader(t("team"), t("teamSub"), "more"),
-      `<div class="list" id="staff-list"></div>
+      `<div class="share-card">
+         <div class="share-head"><span class="share-ic">🔗</span><b>${t("shareTitle")}</b></div>
+         <p class="share-hint">${t("shareHint")}</p>
+         <div class="share-row"><input id="share-link" readonly value="${esc(shareLink())}"/><button class="primary" id="share-copy">${t("copy")}</button></div>
+       </div>
+       <div class="list" id="staff-list"></div>
        <button class="primary big" id="add-staff">＋ ${t("addSeller")}</button>`,
     );
+    const copyBtn = $("#share-copy");
+    if (copyBtn)
+      copyBtn.onclick = async () => {
+        const link = shareLink();
+        try {
+          if (navigator.share) {
+            await navigator.share({ title: "NATHAN KIDS", text: t("shareHint"), url: link });
+          } else {
+            await navigator.clipboard.writeText(link);
+            toast(t("copied"));
+          }
+        } catch {
+          const inp = $("#share-link");
+          if (inp) {
+            inp.select();
+            document.execCommand("copy");
+            toast(t("copied"));
+          }
+        }
+      };
     try {
       const staff = (await NK.reads.staff()).filter((u) => u.role === "staff" && u.active);
       $("#staff-list").innerHTML =
@@ -1613,6 +1647,24 @@
     if (document.visibilityState === "visible") tick();
   });
 
+  // Lien de connexion vendeuse : ?shop=<id> pré-enregistre la boutique sur son
+  // téléphone → elle n'a plus qu'à saisir son PIN (plus de code technique à taper).
+  function initShopFromURL() {
+    try {
+      const s = new URL(location.href).searchParams.get("shop");
+      if (s && /^[0-9a-fA-F-]{8,}$/.test(s)) {
+        const cur = NK.getShop();
+        if (!cur || cur.id !== s) NK.setShop({ id: s });
+        // Nettoie l'URL (retire le paramètre) sans recharger.
+        const clean = location.origin + location.pathname;
+        history.replaceState(null, "", clean);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
   window.addEventListener("online", () => refresh(false));
+  initShopFromURL();
   boot();
 })();

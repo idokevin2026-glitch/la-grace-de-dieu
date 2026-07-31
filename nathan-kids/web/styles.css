@@ -114,9 +114,11 @@ h3 { margin: 20px 0 10px; font-size: 13px; color: var(--muted); text-transform: 
   background: #fff; border-top: 1px solid var(--line); padding-bottom: var(--safe-b); z-index: 6;
   box-shadow: 0 -2px 14px rgba(20,45,28,.05);
 }
-.tab { padding: 9px 0 8px; font-size: 11px; color: var(--muted); display: grid; gap: 2px; justify-items: center; }
-.tab span { font-size: 20px; line-height: 1; }
+.tab { padding: 7px 0 7px; font-size: 11px; color: var(--muted); display: grid; gap: 3px; justify-items: center; }
+.tab span { font-size: 20px; line-height: 1; width: 48px; height: 28px; display: grid; place-items: center; border-radius: 16px; transition: background .16s ease, transform .12s ease; }
 .tab.active { color: var(--green-d); font-weight: 700; }
+.tab.active span { background: color-mix(in srgb, var(--green) 16%, transparent); }
+.tab:active span { transform: scale(.84); }
 
 /* ---------- Accueil : greeting + héro ---------- */
 .greet { margin: 4px 0 14px; }
@@ -213,6 +215,15 @@ h3 { margin: 20px 0 10px; font-size: 13px; color: var(--muted); text-transform: 
 .wk-col.best .wk-bar { background: linear-gradient(180deg, var(--green), var(--green-d)); }
 .wk-lb { font-size: 11px; color: var(--muted); text-transform: capitalize; }
 .wk-col.best .wk-lb { color: var(--green-d); font-weight: 700; }
+
+/* ---------- Lien de connexion vendeuses ---------- */
+.share-card { background: var(--soft); border: 1px solid var(--line); border-radius: 14px; padding: 13px 14px; margin-bottom: 14px; }
+.share-head { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.share-ic { width: 28px; height: 28px; border-radius: 8px; background: #e5eff9; display: grid; place-items: center; flex: none; }
+.share-hint { margin: 6px 0 10px; font-size: 12px; color: var(--muted); }
+.share-row { display: flex; gap: 8px; }
+.share-row input { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); font-size: 12px; color: var(--muted); }
+.share-row .primary { white-space: nowrap; }
 
 /* ---------- Plus : carte profil ---------- */
 .profile { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; box-shadow: var(--shadow-sm); margin-bottom: 14px; }
@@ -314,7 +325,7 @@ h3 { margin: 20px 0 10px; font-size: 13px; color: var(--muted); text-transform: 
 .row-main { flex: 1; min-width: 120px; display: grid; }
 .row-main small { color: var(--muted); font-size: 12px; }
 .row-act { display: flex; gap: 6px; }
-.row-act button, .money-actions button, #add-staff, #staff-list [data-del] { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: #fff; font-size: 13px; }
+.row-act button, .money-actions button, #staff-list [data-del], #staff-list [data-pin] { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: #fff; font-size: 13px; }
 .pill { min-width: 34px; text-align: center; padding: 4px 8px; border-radius: 20px; font-weight: 700; background: var(--soft); }
 .pill.ok { background: #e4f5ea; color: var(--ok); }
 .pill.low { background: #fdf0e2; color: var(--warn); }
@@ -387,7 +398,7 @@ button.big { font-size: 17px; }
   .dead-summary .ds-v { color: #e8c583; }
   .dead-summary .ds-k { color: #c9a75f; }
   .logout-btn { background: #331a1a; }
-  .qty button, .methods .m, .row-act button, .money-actions button, #add-staff, #staff-list [data-del],
+  .qty button, .methods .m, .row-act button, .money-actions button, #staff-list [data-del], #staff-list [data-pin],
   .scan-btn, .stock-actions button, .count, .form input, .form select, .scan-mini { background: var(--soft); }
   .alert { background: #2a2313; border-color: #46381c; }
   .alert-txt b, .alert-go { color: #e8c583; }
@@ -397,7 +408,7 @@ button.big { font-size: 17px; }
   .mv-badge.in { background: #16301f; }
   .mv-badge.out { background: #331a1a; }
   .wk-bar { background: #2a4b35; }
-  .q-stock .q-ic, .t-move .tile-ic { background: #172633; }
+  .q-stock .q-ic, .t-move .tile-ic, .share-ic { background: #172633; }
   .q-credit .q-ic, .t-credit .tile-ic { background: #331b28; }
   .q-report .q-ic { background: #33290f; }
   .t-att .tile-ic { background: #241a3a; }
