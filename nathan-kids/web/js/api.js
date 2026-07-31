@@ -37,6 +37,21 @@ const NK = (() => {
   };
   const writeJSON = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
+  // Auto-réparation : purge une fois le cache + le curseur de synchro quand la
+  // version change. Répare les sessions déjà ouvertes dont le curseur périmé
+  // masquait des données (ex. vendeuse avec un stock affiché à 0) — sans
+  // déconnexion : le prochain `sync_since` repart de zéro et récupère tout.
+  const SYNC_V = "2";
+  try {
+    if (localStorage.getItem("nk.syncv") !== SYNC_V) {
+      localStorage.removeItem(LS.since);
+      localStorage.removeItem(LS.cache);
+      localStorage.setItem("nk.syncv", SYNC_V);
+    }
+  } catch {
+    /* localStorage indisponible */
+  }
+
   // ---- Session --------------------------------------------------------------
   let tokens = readJSON(LS.tokens, null); // { accessToken, refreshToken }
   let user = readJSON(LS.user, null); // { id, name, role }
@@ -134,14 +149,25 @@ const NK = (() => {
   const rpc = (fn, args) => rest("POST", `rpc/${fn}`, args || {});
   const get = (path) => rest("GET", path);
 
+  // Repart d'une synchro NEUVE : vide le cache local et le curseur `since` pour
+  // forcer un `sync_since` complet. Indispensable à la connexion (sinon un
+  // curseur/cache laissé par une session précédente masque les données de la
+  // boutique — ex. une vendeuse voit un stock vide).
+  function resetSyncState() {
+    localStorage.removeItem(LS.since);
+    localStorage.removeItem(LS.cache);
+  }
+
   // ---- Auth publique --------------------------------------------------------
   const auth = {
     async signup(payload) {
+      resetSyncState();
       const r = await authCall("/signup", payload);
       setSession(r);
       return r;
     },
     async login(shopId, pin) {
+      resetSyncState();
       const r = await authCall("/login", { shopId, pin });
       setSession({ ...r, shop: shop || { id: shopId } });
       writeJSON(LS.shop, shop || { id: shopId });
@@ -344,8 +370,11 @@ const NK = (() => {
     getUser,
     getShop,
     setShop: (s) => {
+      // Changement de boutique (ex. lien ?shop=) → repartir d'une synchro neuve.
+      const changed = !shop || !s || shop.id !== s.id;
       shop = s;
       writeJSON(LS.shop, s);
+      if (changed) resetSyncState();
     },
     auth,
     rpc,
