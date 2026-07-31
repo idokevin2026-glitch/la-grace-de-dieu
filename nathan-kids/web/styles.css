@@ -162,6 +162,19 @@ h3 { margin: 20px 0 10px; font-size: 13px; color: var(--muted); text-transform: 
 .q-credit .q-ic { background: #fce7f0; }
 .q-report .q-ic { background: #fdf1de; }
 
+/* ---------- CTA vente (vendeuse) ---------- */
+.sell-cta {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 18px 20px;
+  border-radius: 18px; color: #fff; background: linear-gradient(135deg, var(--teal), var(--green));
+  box-shadow: 0 10px 26px rgba(23, 162, 162, 0.28); margin-bottom: 4px;
+}
+.sell-cta:active { transform: scale(.99); }
+.sell-ic { font-size: 28px; flex: none; }
+.sell-txt { flex: 1; display: grid; gap: 1px; }
+.sell-txt b { font-size: 19px; font-weight: 800; }
+.sell-txt small { opacity: .9; font-size: 13px; }
+.sell-arrow { font-size: 24px; opacity: .9; }
+
 /* ---------- Cartes ---------- */
 .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: grid; gap: 4px; box-shadow: var(--shadow-sm); }
@@ -309,6 +322,16 @@ h3 { margin: 20px 0 10px; font-size: 13px; color: var(--muted); text-transform: 
 .money-actions { display: flex; gap: 8px; margin: 12px 0 4px; }
 .money-actions button { flex: 1; font-weight: 600; }
 
+/* ---------- Code couleur par catégorie : bleu=vêtements, rose=cosmétiques ---------- */
+.row.cat-vet, .prod.cat-vet { border-left: 4px solid var(--blue); }
+.row.cat-cos, .prod.cat-cos { border-left: 4px solid var(--pink); }
+
+/* Champ code-barres + bouton scan dans le formulaire produit */
+.scan-field { display: flex; gap: 8px; }
+.scan-field input { flex: 1; width: auto; }
+.scan-mini { width: 48px; border: 1px solid var(--line); border-radius: 12px; background: #fff; font-size: 18px; flex: none; }
+.scan-mini:active { transform: scale(.95); }
+
 /* ---------- Divers ---------- */
 .badge { background: var(--soft); border-radius: 20px; padding: 1px 9px; font-size: 12px; font-weight: 700; }
 .badge.warn { background: var(--warn); color: #fff; }
@@ -365,7 +388,7 @@ button.big { font-size: 17px; }
   .dead-summary .ds-k { color: #c9a75f; }
   .logout-btn { background: #331a1a; }
   .qty button, .methods .m, .row-act button, .money-actions button, #add-staff, #staff-list [data-del],
-  .scan-btn, .stock-actions button, .count, .form input, .form select { background: var(--soft); }
+  .scan-btn, .stock-actions button, .count, .form input, .form select, .scan-mini { background: var(--soft); }
   .alert { background: #2a2313; border-color: #46381c; }
   .alert-txt b, .alert-go { color: #e8c583; }
   .alert-txt small { color: #c9a75f; }

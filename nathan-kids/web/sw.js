@@ -4,7 +4,7 @@
 // déployée (fini le cache figé). Hors ligne, on sert la dernière copie mise en
 // cache. Les appels API (Supabase) ne sont jamais interceptés (données gérées
 // par l'outbox côté app). Voir js/api.js.
-const CACHE = "nk-shell-v4";
+const CACHE = "nk-shell-v5";
 const SHELL = [
   "./",
   "./index.html",

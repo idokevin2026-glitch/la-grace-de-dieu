@@ -256,6 +256,15 @@ const NK = (() => {
     removeStaff(id) {
       return rpc("auth_remove_staff", { p_user_id: id });
     },
+    // Réinitialise le PIN d'une vendeuse (admin) — sans SMS. Requiert la
+    // migration 0010 (fonction auth_set_staff_pin).
+    setStaffPin(userId, pin) {
+      return rpc("auth_set_staff_pin", { p_user_id: userId, p_new_pin: pin });
+    },
+    // Modification d'un produit (admin). PATCH partiel ; la RLS vérifie l'admin.
+    updateProduct(id, patch) {
+      return rest("PATCH", `products?id=eq.${encodeURIComponent(id)}&select=*`, patch);
+    },
     // Création de produit (admin). shop_id injecté depuis la session ; la RLS
     // vérifie `shop_id = auth_shop_id()`. Écriture en ligne (retour de la ligne).
     createProduct(p) {
