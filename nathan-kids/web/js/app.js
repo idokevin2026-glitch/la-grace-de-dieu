@@ -42,6 +42,10 @@
       deadCount: "article(s) mort(s)", noDeadStock: "Aucun stock mort — tout tourne 🎉",
       gestion: "Gestion", gestionSub: "Outils de suivi", disconnect: "Se déconnecter",
       roleAdminF: "Administratrice", roleStaffF: "Vendeuse",
+      unknownCode: "Article inconnu pour ce code", unknownAddQ: "Article inconnu. L'ajouter au stock avec ce code-barres ?",
+      editProduct: "Modifier le produit", edit: "Modifier", scanBtn: "Scanner",
+      resetPinStaff: "Réinitialiser le PIN", newPinQ: "Nouveau code PIN (4 chiffres) ?", pinReset: "PIN réinitialisé ✓",
+      todaySalesCount: "Ventes du jour", itemsSoldToday: "Articles vendus", myStock: "Le stock", startSale: "Démarrer une vente",
       noData: "—", offlineData: "Indisponible hors ligne.", byPayment: "Par mode de paiement",
       itemsSold: "Articles vendus", operations: "Opérations", exportCsv: "Excel (CSV)", exportPdf: "PDF",
       inventoryHint: "Saisissez le stock physiquement compté. Seuls les écarts sont enregistrés.",
@@ -81,6 +85,10 @@
       deadCount: "dead item(s)", noDeadStock: "No dead stock — all moving 🎉",
       gestion: "Management", gestionSub: "Tracking tools", disconnect: "Log out",
       roleAdminF: "Administrator", roleStaffF: "Seller",
+      unknownCode: "Unknown item for this code", unknownAddQ: "Unknown item. Add it to stock with this barcode?",
+      editProduct: "Edit product", edit: "Edit", scanBtn: "Scan",
+      resetPinStaff: "Reset PIN", newPinQ: "New PIN code (4 digits)?", pinReset: "PIN reset ✓",
+      todaySalesCount: "Today's sales", itemsSoldToday: "Items sold", myStock: "Stock", startSale: "Start a sale",
       noData: "—", offlineData: "Unavailable offline.", byPayment: "By payment method",
       itemsSold: "Items sold", operations: "Operations", exportCsv: "Excel (CSV)", exportPdf: "PDF",
       inventoryHint: "Enter the physically counted stock. Only differences are recorded.",
@@ -96,6 +104,9 @@
     localStorage.setItem("nk.lang", l);
   };
   const pn = (p) => (lang === "en" ? p.name_en || p.name_fr : p.name_fr || p.name_en);
+  // Code couleur par catégorie : bleu = vêtements, rose = cosmétiques.
+  const catClass = (p) =>
+    p && p.category === "cosmetiques" ? "cat-cos" : p && p.category === "vetements" ? "cat-vet" : "cat-other";
 
   const fmt = (n) =>
     n == null ? t("noData") : new Intl.NumberFormat(lang === "en" ? "en-US" : "fr-FR").format(n) + " F";
@@ -400,16 +411,31 @@
     </div>`;
   }
 
+  function activeTab() {
+    const s = state.screen;
+    if (!NK.isAdmin() && s === "credits") return "credits";
+    return TAB_OF[s] || "home";
+  }
+
   function tabbarHTML() {
     const admin = NK.isAdmin();
-    const active = TAB_OF[state.screen] || "home";
-    const nav = [
-      ["home", t("home"), "🏠"],
-      ["sales", t("sales"), "🛒"],
-      ["stock", t("stock"), "📦"],
-      ["reports", t("reports"), "📊"],
-      ["more", t("more"), "⋯"],
-    ];
+    const active = activeTab();
+    // La vendeuse n'a pas d'onglet Rapports (finances) : Crédits à la place.
+    const nav = admin
+      ? [
+          ["home", t("home"), "🏠"],
+          ["sales", t("sales"), "🛒"],
+          ["stock", t("stock"), "📦"],
+          ["reports", t("reports"), "📊"],
+          ["more", t("more"), "⋯"],
+        ]
+      : [
+          ["home", t("home"), "🏠"],
+          ["sales", t("sales"), "🛒"],
+          ["stock", t("stock"), "📦"],
+          ["credits", t("credits"), "📕"],
+          ["more", t("more"), "⋯"],
+        ];
     return `<nav class="tabbar">
       ${nav
         .map(
@@ -479,68 +505,87 @@
     const w = state.week;
     const owner = (NK.getUser() || {}).name || "";
     const alertN = ind.lowCount + ind.outCount;
-
-    // Delta vs hier (à partir de l'agrégat hebdo).
-    let deltaHTML = "";
-    if (w && w.yestTotal != null) {
-      const today = w.todayTotal || 0;
-      const yest = w.yestTotal || 0;
-      const pct = yest > 0 ? Math.round(((today - yest) / yest) * 100) : today > 0 ? 100 : 0;
-      const up = today >= yest;
-      deltaHTML = `<span class="hero-delta ${up ? "up" : "down"}">${up ? "↗" : "↘"} ${up ? "+" : ""}${pct}% ${t("vsYesterday")}</span>`;
-    }
-
     const itemsSold = d && d.itemsSold ? d.itemsSold.reduce((a, i) => a + i.qty, 0) : null;
+
     const header = `<header class="topbar brand-bar">
         <div class="wordmark">${wordmarkHTML()}</div>
         ${topActions()}
       </header>`;
 
-    const body = `
-      <div class="greet">
-        <h1>${t("hello")}, ${esc(owner)} 👋</h1>
-        <p class="date">${dateLabel()}</p>
-      </div>
+    const alertHTML = alertN
+      ? `<button class="alert" data-nav="stock">
+           <span class="alert-ic">!</span>
+           <div class="alert-txt"><b>${t("watchStock")}</b><small>${alertN} ${t("itemsLow")}</small></div>
+           <span class="alert-go">${t("seeStock")} →</span>
+         </button>`
+      : "";
 
-      <div class="hero">
-        <div class="hero-main">
-          <span class="hero-k">${t("todaySales")}</span>
-          <span class="hero-v">${d ? fmt(d.revenue) : "—"}</span>
-          ${deltaHTML}
-        </div>
-        <div class="hero-stats">
-          ${admin ? `<div><b>${d ? fmt(d.profit) : "—"}</b><span>${t("benefit")}</span></div>` : ""}
-          <div><b>${d ? d.count : "—"}</b><span>${t("orders")}</span></div>
-          <div><b>${itemsSold != null ? itemsSold : "—"}</b><span>${t("items")}</span></div>
-        </div>
-      </div>
-
-      ${
-        alertN
-          ? `<button class="alert" data-nav="stock">
-               <span class="alert-ic">!</span>
-               <div class="alert-txt"><b>${t("watchStock")}</b><small>${alertN} ${t("itemsLow")}</small></div>
-               <span class="alert-go">${t("seeStock")} →</span>
-             </button>`
-          : ""
-      }
-
-      <h3>${t("quickActions")}</h3>
-      <div class="quick">
-        <button class="q q-sale" data-nav="sales"><span class="q-ic">🛒</span>${t("newSale")}</button>
-        <button class="q q-stock" data-nav="stock"><span class="q-ic">📦</span>${t("stock")}</button>
-        <button class="q q-credit" data-nav="credits"><span class="q-ic">📕</span>${t("credits")}</button>
-        <button class="q q-report" data-nav="reports"><span class="q-ic">📊</span>${t("reports")}</button>
-      </div>
-
-      <h3>${t("todayTitle")}</h3>
+    const stockCards = `
       <section class="cards">
         <div class="card"><span class="k">${t("articles")}</span><span class="v">${ind.skuCount}</span></div>
         <div class="card ${ind.lowCount ? "warn" : ""}"><span class="k">${t("lowStock")}</span><span class="v">${ind.lowCount}</span></div>
         <div class="card ${ind.outCount ? "danger" : ""}"><span class="k">${t("ruptures")}</span><span class="v">${ind.outCount}</span></div>
         <div class="card"><span class="k">${t("units")}</span><span class="v">${ind.units}</span></div>
-      </section>
-    `;
+      </section>`;
+
+    let body;
+    if (admin) {
+      // Delta vs hier (à partir de l'agrégat hebdo).
+      let deltaHTML = "";
+      if (w && w.yestTotal != null) {
+        const tdy = w.todayTotal || 0;
+        const yest = w.yestTotal || 0;
+        const pct = yest > 0 ? Math.round(((tdy - yest) / yest) * 100) : tdy > 0 ? 100 : 0;
+        const up = tdy >= yest;
+        deltaHTML = `<span class="hero-delta ${up ? "up" : "down"}">${up ? "↗" : "↘"} ${up ? "+" : ""}${pct}% ${t("vsYesterday")}</span>`;
+      }
+      body = `
+        <div class="greet"><h1>${t("hello")}, ${esc(owner)} 👋</h1><p class="date">${dateLabel()}</p></div>
+        <div class="hero">
+          <div class="hero-main">
+            <span class="hero-k">${t("todaySales")}</span>
+            <span class="hero-v">${d ? fmt(d.revenue) : "—"}</span>
+            ${deltaHTML}
+          </div>
+          <div class="hero-stats">
+            <div><b>${d ? fmt(d.profit) : "—"}</b><span>${t("benefit")}</span></div>
+            <div><b>${d ? d.count : "—"}</b><span>${t("orders")}</span></div>
+            <div><b>${itemsSold != null ? itemsSold : "—"}</b><span>${t("items")}</span></div>
+          </div>
+        </div>
+        ${alertHTML}
+        <h3>${t("quickActions")}</h3>
+        <div class="quick">
+          <button class="q q-sale" data-nav="sales"><span class="q-ic">🛒</span>${t("newSale")}</button>
+          <button class="q q-stock" data-nav="stock"><span class="q-ic">📦</span>${t("stock")}</button>
+          <button class="q q-credit" data-nav="credits"><span class="q-ic">📕</span>${t("credits")}</button>
+          <button class="q q-report" data-nav="reports"><span class="q-ic">📊</span>${t("reports")}</button>
+        </div>
+        <h3>${t("todayTitle")}</h3>
+        ${stockCards}`;
+    } else {
+      // Vendeuse : AUCUN chiffre d'affaires (ni CA, ni bénéfice). Vue orientée action.
+      body = `
+        <div class="greet"><h1>${t("hello")}, ${esc(owner)} 👋</h1><p class="date">${dateLabel()}</p></div>
+        <button class="sell-cta" data-nav="sales">
+          <span class="sell-ic">🛒</span>
+          <span class="sell-txt"><b>${t("startSale")}</b><small>${t("newSale")}</small></span>
+          <span class="sell-arrow">→</span>
+        </button>
+        ${alertHTML}
+        <h3>${t("todayTitle")}</h3>
+        <section class="cards">
+          <div class="card"><span class="k">${t("todaySalesCount")}</span><span class="v">${d ? d.count : "—"}</span></div>
+          <div class="card"><span class="k">${t("itemsSoldToday")}</span><span class="v">${itemsSold != null ? itemsSold : "—"}</span></div>
+        </section>
+        <h3>${t("quickActions")}</h3>
+        <div class="quick">
+          <button class="q q-stock" data-nav="stock"><span class="q-ic">📦</span>${t("stock")}</button>
+          <button class="q q-credit" data-nav="credits"><span class="q-ic">📕</span>${t("credits")}</button>
+        </div>
+        <h3>${t("myStock")}</h3>
+        ${stockCards}`;
+    }
 
     paint(header, body);
     $(".content").onclick = (e) => {
@@ -583,7 +628,7 @@
         ${state.products
           .map(
             (p) => `
-          <button class="prod ${p.stock <= 0 ? "off" : ""}" data-add="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>
+          <button class="prod ${catClass(p)} ${p.stock <= 0 ? "off" : ""}" data-add="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>
             <span class="pn">${esc(pn(p))}</span>
             <span class="pp">${fmt(p.price)}</span>
             <span class="ps ${p.stock <= 0 ? "z" : p.stock <= p.threshold ? "low" : ""}">stock ${p.stock}</span>
@@ -642,8 +687,8 @@
     $("#scan").onclick = scan;
   }
 
-  // Scan code-barres : BarcodeDetector si dispo (caméra), sinon saisie manuelle.
-  async function scan() {
+  // Récupère un code-barres : caméra (BarcodeDetector) si dispo, sinon saisie.
+  async function getScannedCode() {
     let code = null;
     if ("BarcodeDetector" in window && navigator.mediaDevices) {
       try {
@@ -653,6 +698,13 @@
       }
     }
     if (!code) code = (prompt(t("scan") + " :") || "").trim();
+    return code || null;
+  }
+
+  // Scan en vente : trouve l'article (cache puis API). Inconnu → l'admin peut
+  // le créer immédiatement avec ce code-barres (comble le trou de saisie).
+  async function scan() {
+    const code = await getScannedCode();
     if (!code) return;
     let p = state.products.find((x) => x.barcode === code);
     if (!p) {
@@ -663,7 +715,10 @@
         /* offline */
       }
     }
-    if (!p) return toast(lang === "en" ? "Unknown item for this code" : "Article inconnu pour ce code", "err");
+    if (!p) {
+      if (NK.isAdmin() && confirm(t("unknownAddQ"))) return addProductModal(code);
+      return toast(t("unknownCode"), "err");
+    }
     addToCart(p.id);
     toast(`+ ${pn(p)}`);
   }
@@ -779,7 +834,7 @@
         ${state.products
           .map(
             (p) => `
-          <div class="row" data-p="${p.id}">
+          <div class="row ${catClass(p)}" data-p="${p.id}">
             <div class="row-main">
               <strong>${esc(pn(p))}</strong>
               <small>${esc(p.category)}${admin && p.cost != null ? ` · ${lang === "en" ? "cost" : "coût"} ${fmt(p.cost)}` : ""} · ${fmt(p.price)}</small>
@@ -788,6 +843,7 @@
             <div class="row-act">
               <button data-restock="${p.id}">+ ${t("restock")}</button>
               <button data-adjust="${p.id}">± ${t("adjust")}</button>
+              ${admin ? `<button data-edit="${p.id}">✎ ${t("edit")}</button>` : ""}
             </div>
           </div>`,
           )
@@ -806,6 +862,12 @@
     $("#stock-list").onclick = async (e) => {
       const rs = e.target.closest("[data-restock]");
       const aj = e.target.closest("[data-adjust]");
+      const ed = e.target.closest("[data-edit]");
+      if (ed) {
+        const p = state.products.find((x) => String(x.id) === ed.dataset.edit);
+        if (p) editProductModal(p);
+        return;
+      }
       if (rs) {
         const qty = +prompt(lang === "en" ? "Quantity received?" : "Quantité reçue ?");
         if (!qty || qty <= 0) return;
@@ -823,7 +885,7 @@
     };
     $("#inv-btn").onclick = () => go("inventory");
     const addBtn = $("#add-prod-btn");
-    if (addBtn) addBtn.onclick = addProductModal;
+    if (addBtn) addBtn.onclick = () => addProductModal();
   }
 
   function screenInventory() {
@@ -862,18 +924,48 @@
     };
   }
 
-  function addProductModal() {
-    const body = `
-      <h3>${lang === "en" ? "New product" : "Nouveau produit"}</h3>
+  // Champs de produit partagés (création / édition). En édition, le stock n'est
+  // PAS modifiable ici (il passe par réassort / ajustement / inventaire, pour
+  // garder le journal des mouvements juste).
+  function productFields(p, isEdit) {
+    p = p || {};
+    const L = (en, fr) => (lang === "en" ? en : fr);
+    return `
       <div class="form">
-        <input id="f-fr" placeholder="${lang === "en" ? "Name (French)" : "Nom (français)"}"/>
-        <input id="f-en" placeholder="${lang === "en" ? "Name (English)" : "Nom (anglais)"}"/>
-        <select id="f-cat"><option value="vetements">${lang === "en" ? "Clothing" : "Vêtements"}</option><option value="cosmetiques">${lang === "en" ? "Cosmetics" : "Cosmétiques"}</option></select>
-        <div class="two"><input id="f-price" type="number" placeholder="${lang === "en" ? "Sale price" : "Prix de vente"}"/><input id="f-cost" type="number" placeholder="${lang === "en" ? "Cost" : "Coût d'achat"}"/></div>
-        <div class="two"><input id="f-stock" type="number" placeholder="${lang === "en" ? "Initial stock" : "Stock initial"}" value="0"/><input id="f-thr" type="number" placeholder="${lang === "en" ? "Alert threshold" : "Seuil alerte"}" value="4"/></div>
-        <input id="f-sup" placeholder="${lang === "en" ? "Supplier (optional)" : "Fournisseur (optionnel)"}"/>
-        <input id="f-code" placeholder="${lang === "en" ? "Barcode (blank = generated)" : "Code-barres (vide = généré)"}"/>
-      </div>`;
+        <input id="f-fr" placeholder="${L("Name (French)", "Nom (français)")}" value="${esc(p.name_fr || "")}"/>
+        <input id="f-en" placeholder="${L("Name (English)", "Nom (anglais)")}" value="${esc(p.name_en || "")}"/>
+        <select id="f-cat">
+          <option value="vetements" ${p.category === "vetements" ? "selected" : ""}>${L("Clothing", "Vêtements")}</option>
+          <option value="cosmetiques" ${p.category === "cosmetiques" ? "selected" : ""}>${L("Cosmetics", "Cosmétiques")}</option>
+        </select>
+        <div class="two"><input id="f-price" type="number" inputmode="numeric" placeholder="${L("Sale price", "Prix de vente")}" value="${p.price ?? ""}"/><input id="f-cost" type="number" inputmode="numeric" placeholder="${L("Cost", "Coût d'achat")}" value="${p.cost ?? ""}"/></div>
+        ${
+          isEdit
+            ? `<input id="f-thr" type="number" inputmode="numeric" placeholder="${L("Alert threshold", "Seuil alerte")}" value="${p.threshold ?? 4}"/>`
+            : `<div class="two"><input id="f-stock" type="number" inputmode="numeric" placeholder="${L("Initial stock", "Stock initial")}" value="0"/><input id="f-thr" type="number" inputmode="numeric" placeholder="${L("Alert threshold", "Seuil alerte")}" value="4"/></div>`
+        }
+        <input id="f-sup" placeholder="${L("Supplier (optional)", "Fournisseur (optionnel)")}" value="${esc(p.supplier || "")}"/>
+        <div class="scan-field">
+          <input id="f-code" placeholder="${L("Barcode (blank = generated)", "Code-barres (vide = généré)")}" value="${esc(p.barcode || "")}"/>
+          <button type="button" class="scan-mini" id="f-scan" title="${t("scanBtn")}">📷</button>
+        </div>`;
+  }
+
+  // Câble le bouton 📷 du formulaire produit → remplit le champ code-barres.
+  function wireFormScan() {
+    const sb = document.getElementById("f-scan");
+    if (sb)
+      sb.onclick = async () => {
+        const c = await getScannedCode();
+        const inp = document.getElementById("f-code");
+        if (c && inp) inp.value = c;
+      };
+  }
+
+  // Ajout d'un produit (admin). `prefill` = code-barres pré-rempli (scan vente).
+  // Code-barres EAN-13 valide généré si absent.
+  function addProductModal(prefill) {
+    const body = `<h3>${lang === "en" ? "New product" : "Nouveau produit"}</h3>${productFields({ barcode: typeof prefill === "string" ? prefill : "" }, false)}`;
     modal(body, async () => {
       const fr = $("#f-fr").value.trim();
       const en = $("#f-en").value.trim() || fr;
@@ -908,6 +1000,46 @@
         return false;
       }
     });
+    wireFormScan();
+  }
+
+  // Édition d'un produit (admin) : nom, catégorie, prix, coût, seuil, fournisseur
+  // et surtout le CODE-BARRES (pour enregistrer le vrai code du produit).
+  function editProductModal(p) {
+    const body = `<h3>${t("editProduct")}</h3>${productFields(p, true)}`;
+    modal(body, async () => {
+      const fr = $("#f-fr").value.trim();
+      if (!fr) {
+        toast(lang === "en" ? "Name required" : "Nom requis", "err");
+        return false;
+      }
+      const code = $("#f-code").value.trim();
+      if (code && !NKBarcode.isValid(code)) {
+        toast(lang === "en" ? "Invalid EAN-13 barcode" : "Code-barres EAN-13 invalide", "err");
+        return false;
+      }
+      const patch = {
+        name_fr: fr,
+        name_en: $("#f-en").value.trim() || fr,
+        category: $("#f-cat").value,
+        price: +$("#f-price").value || 0,
+        cost: +$("#f-cost").value || 0,
+        threshold: +$("#f-thr").value || 4,
+        supplier: $("#f-sup").value.trim() || null,
+      };
+      if (code) patch.barcode = code; // ne pas écraser par une valeur vide
+      try {
+        await NK.ops.updateProduct(p.id, patch);
+        toast(lang === "en" ? "Product updated ✓" : "Produit modifié ✓");
+        await refresh(false);
+        go("stock");
+        return true;
+      } catch (e) {
+        toast(errMsg(e), "err");
+        return false;
+      }
+    });
+    wireFormScan();
   }
 
   function modal(bodyHTML, onOk) {
@@ -1064,10 +1196,10 @@
     const tiles = [
       ["movements", "🔄", t("movements"), t("movementsSub"), "t-move"],
       ["inventory", "📋", t("inventoryTile"), t("inventoryHintShort"), "t-inv"],
-      ["dead", "🕰️", t("deadStock"), t("deadStockSub"), "t-dead"],
-      ["credits", "📕", t("credits"), lang === "en" ? "Who owes money" : "Qui doit de l'argent", "t-credit"],
     ];
     if (admin) {
+      tiles.push(["dead", "🕰️", t("deadStock"), t("deadStockSub"), "t-dead"]);
+      tiles.push(["credits", "📕", t("credits"), lang === "en" ? "Who owes money" : "Qui doit de l'argent", "t-credit"]);
       tiles.push(["attendance", "⏱️", t("attendance"), t("attendanceSub"), "t-att"]);
       tiles.push(["cash", "💰", t("cash"), t("cashSub"), "t-cash"]);
       tiles.push(["team", "👥", t("team"), t("teamSub"), "t-team"]);
@@ -1320,11 +1452,24 @@
         staff
           .map(
             (s) =>
-              `<div class="row"><div class="avatar sm">${esc(initials(s.name))}</div><div class="row-main"><strong>${esc(s.name)}</strong></div><button data-del="${s.id}">${t("remove")}</button></div>`,
+              `<div class="row"><div class="avatar sm">${esc(initials(s.name))}</div><div class="row-main"><strong>${esc(s.name)}</strong></div>
+               <div class="row-act"><button data-pin="${s.id}" title="${t("resetPinStaff")}">🔑</button><button data-del="${s.id}">${t("remove")}</button></div></div>`,
           )
           .join("") || `<p class="muted">${t("noSeller")}</p>`;
       $("#staff-list").onclick = async (e) => {
+        const pinBtn = e.target.closest("[data-pin]");
         const d = e.target.closest("[data-del]");
+        if (pinBtn) {
+          const pin = prompt(t("newPinQ"));
+          if (!/^\d{4}$/.test(pin || "")) return toast(lang === "en" ? "Invalid PIN" : "PIN invalide", "err");
+          try {
+            await NK.ops.setStaffPin(pinBtn.dataset.pin, pin);
+            toast(t("pinReset"));
+          } catch (er) {
+            toast(errMsg(er), "err");
+          }
+          return;
+        }
         if (d && confirm(lang === "en" ? "Deactivate this seller?" : "Désactiver cette vendeuse ?")) {
           await NK.ops.removeStaff(d.dataset.del);
           toast(lang === "en" ? "Seller deactivated" : "Vendeuse désactivée");
@@ -1365,7 +1510,10 @@
     team: screenTeam,
     dead: screenDeadStock,
   };
+  // Écrans réservés à l'admin (finances / gestion) — la vendeuse est redirigée.
+  const ADMIN_ONLY = ["reports", "daily", "cash", "team", "dead", "attendance"];
   function go(id) {
+    if (!NK.isAdmin() && ADMIN_ONLY.includes(id)) id = "home";
     state.screen = id;
     (screens[id] || screenHome)();
   }
@@ -1413,16 +1561,19 @@
   }
 
   // Charge fiche du jour + hebdo (utilisés par Accueil et Rapports).
+  // L'hebdo (graphe CA) n'est chargé que pour l'admin.
   async function loadStats() {
     try {
       state.daily = await NK.reads.dailySheet(today(), tz());
     } catch {
       /* garde l'ancien état */
     }
-    try {
-      state.week = aggWeek(await NK.reads.weekSales(weekFromISO()));
-    } catch {
-      /* garde l'ancien état */
+    if (NK.isAdmin()) {
+      try {
+        state.week = aggWeek(await NK.reads.weekSales(weekFromISO()));
+      } catch {
+        /* garde l'ancien état */
+      }
     }
   }
 
@@ -1447,6 +1598,20 @@
     go("home");
     await refresh(true);
   }
+
+  // Rafraîchissement « dynamique » : met à jour les données en tâche de fond et
+  // ré-affiche les écrans passifs (tableaux de bord / journaux) sans gêner la
+  // saisie en cours (vente, formulaires…).
+  const PASSIVE = ["home", "reports", "attendance", "movements", "dead"];
+  async function tick() {
+    if (document.visibilityState !== "visible" || !navigator.onLine || !NK.isAuthed()) return;
+    await refresh(false);
+    if (PASSIVE.includes(state.screen)) go(state.screen);
+  }
+  setInterval(tick, 60000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") tick();
+  });
 
   window.addEventListener("online", () => refresh(false));
   boot();

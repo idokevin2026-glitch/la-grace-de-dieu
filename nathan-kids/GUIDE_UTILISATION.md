@@ -20,10 +20,13 @@ bien démarrer. *(À imprimer ou à garder sur le téléphone.)*
 5. Touchez **Encaisser**. ✅ La vente est enregistrée et le stock mis à jour tout seul.
 
 ## 📦 Gérer le stock
-- Onglet **Stock** : liste des articles, recherche, catégories.
-- **＋ Ajouter** (admin) : créer un produit (nom, prix, coût, stock, fournisseur). Le code-barres est généré automatiquement.
+- Onglet **Stock** : liste des articles, recherche, catégories. **Code couleur** : bandeau **bleu** = vêtements, **rose** = cosmétiques.
+- **＋ Produit** (admin) : créer un article. Pour le **code-barres**, appuyez sur 📷 pour **scanner le vrai code du produit** (sinon un code est généré).
+- **✎ Modifier** (admin) : corriger un article — nom, prix, coût, seuil, fournisseur, et **son code-barres** (scan 📷). Indispensable pour qu'un article soit **reconnu au scan en caisse**.
 - Sur un article : **＋ Réassort** (marchandise reçue) ou **± Ajuster** (correction).
 - **📋 Inventaire** : compter physiquement le stock ; seuls les écarts sont enregistrés.
+
+> 💡 **Scan en caisse** : un article n'est trouvé au scan que si **son vrai code-barres est enregistré** (via 📷 à la création ou à la modification). Si vous scannez un article inconnu, l'admin peut le créer directement avec ce code.
 
 ## ➕ Le menu « Plus »
 - L'onglet **Plus** (en bas à droite) regroupe les écrans secondaires : **Crédits**, **Mouvements de stock**, et — pour l'admin — **Pointage vendeuses**, **Caisse & Banque**, **Équipe**.
@@ -57,7 +60,11 @@ bien démarrer. *(À imprimer ou à garder sur le téléphone.)*
 
 ## 👥 Gérer l'équipe *(admin uniquement)*
 - **＋ Ajouter une vendeuse** : nom + son code PIN (différent des autres).
+- **🔑 Réinitialiser le PIN** : si une vendeuse oublie son code, l'admin lui en donne un nouveau **immédiatement** (pas besoin de SMS).
 - **Retirer** une vendeuse : elle ne peut plus se connecter (son historique est conservé).
+
+## 👗 L'écran de la vendeuse
+- La vendeuse a une **interface simplifiée** : vente, stock, crédits. Elle **ne voit aucun chiffre d'affaires** (ni recette, ni bénéfice, ni caisse/banque, ni rapports) — ces informations restent réservées à l'admin.
 
 ## 📶 Ça marche même sans internet !
 - Vous pouvez **vendre hors connexion** : les opérations sont mises en file d'attente.
@@ -67,9 +74,10 @@ bien démarrer. *(À imprimer ou à garder sur le téléphone.)*
 - Ouvrez l'appli dans le navigateur → menu (⋮) → **« Ajouter à l'écran d'accueil »**.
 - L'appli s'ouvre alors comme une vraie application, en plein écran.
 
-## ❓ Code PIN oublié (admin)
-- Sur l'écran de connexion : **« Code oublié ? »** → entrez le téléphone de l'admin → un **code** est envoyé → saisissez-le + un **nouveau PIN**.
-  *(L'envoi par SMS nécessite la configuration d'un service SMS ; sinon, voir l'administrateur technique.)*
+## ❓ Code PIN oublié
+- **Vendeuse** : l'admin la réinitialise en 2 secondes (Plus → Équipe → **🔑**). Aucun SMS requis.
+- **Admin** : sur l'écran de connexion, **« Code oublié ? »** envoie un **code par SMS** au téléphone de l'admin.
+  *(⚠ L'envoi SMS nécessite un fournisseur SMS configuré, ex. Twilio — voir l'administrateur technique. Sans SMS configuré, aucun code n'est reçu.)*
 
 ---
 
