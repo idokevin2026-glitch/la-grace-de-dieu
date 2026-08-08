@@ -1,4 +1,5 @@
 import { createClient as createRawClient } from "@supabase/supabase-js";
+import { cleanSupabaseEnv } from "./clean-env";
 
 /**
  * Client Supabase "service role" — contourne la RLS.
@@ -7,8 +8,8 @@ import { createClient as createRawClient } from "@supabase/supabase-js";
  * montants), suivi public de commande, webhook de paiement.
  */
 export function createAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = cleanSupabaseEnv(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const key = cleanSupabaseEnv(process.env.SUPABASE_SERVICE_ROLE_KEY);
   if (!url || !key) {
     throw new Error("Supabase service role non configuré (SUPABASE_SERVICE_ROLE_KEY manquant).");
   }

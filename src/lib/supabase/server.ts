@@ -1,13 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cleanSupabaseEnv } from "./clean-env";
 
 /** Client Supabase pour Server Components / Route Handlers — respecte la session et la RLS de l'utilisateur courant. */
 export async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    cleanSupabaseEnv(process.env.NEXT_PUBLIC_SUPABASE_URL),
+    cleanSupabaseEnv(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
     {
       cookies: {
         getAll() {
