@@ -10,6 +10,7 @@ import { NewsletterBand } from "@/components/layout/NewsletterBand";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { createClient } from "@/lib/supabase/client";
+import { frAuthError } from "@/lib/auth-errors";
 import { fcfa, tierFor, nextTier, TIERS, STATUS_STEPS, POINT_VALUE } from "@/lib/constants";
 import type { Order } from "@/lib/types";
 
@@ -53,11 +54,11 @@ export default function AccountPage() {
           password: f.password,
           options: { data: { name: f.name.trim(), phone: f.phone.trim() } },
         });
-        if (error) toast(error.message, { tone: "gold", icon: "x" });
+        if (error) toast(frAuthError(error.message), { tone: "gold", icon: "x" });
         else toast("Bienvenue au Cercle La Grâce de Dieu !", { title: "Compte créé", tone: "gold", icon: "star" });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: f.email.trim(), password: f.password });
-        if (error) toast(error.message, { tone: "gold", icon: "x" });
+        if (error) toast(frAuthError(error.message), { tone: "gold", icon: "x" });
         else toast("Content de vous revoir !", { title: "Connecté", tone: "green", icon: "check" });
       }
       setBusy(false);
