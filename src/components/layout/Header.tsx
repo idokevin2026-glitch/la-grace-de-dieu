@@ -90,7 +90,7 @@ export function Header() {
           className="lg-btn"
           style={{ background: "none", border: "none", padding: 0, display: "flex", flexDirection: "column", alignItems: "flex-start", lineHeight: 1 }}
         >
-          <span style={{ fontFamily: "var(--font-marcellus),serif", fontSize: 23, letterSpacing: ".03em", color: "var(--ink)", lineHeight: 1 }}>
+          <span style={{ fontFamily: "var(--font-marcellus),serif", fontSize: "clamp(19px, 5vw, 23px)", letterSpacing: ".03em", color: "var(--ink)", lineHeight: 1, whiteSpace: "nowrap" }}>
             La Grâce de Dieu
           </span>
           <span style={{ fontSize: 9.5, letterSpacing: ".38em", textTransform: "uppercase", color: "var(--terracotta)", marginLeft: 2 }}>Gagnoa</span>

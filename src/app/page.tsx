@@ -23,46 +23,51 @@ export default async function HomePage() {
       <section style={{ position: "relative", overflow: "hidden", background: "var(--ink)", color: "var(--paper)" }}>
         <div
           className="wax-fill"
-          style={{ position: "absolute", inset: 0, opacity: 0.28, ["--pat-bg" as string]: "#3a2c1e", ["--pat-fg" as string]: "rgba(255,220,170,.5)", ["--pat-fg2" as string]: "rgba(200,140,60,.35)" }}
+          style={{ position: "absolute", inset: 0, opacity: 0.12, ["--pat-bg" as string]: "#2b2017", ["--pat-fg" as string]: "rgba(255,220,170,.5)", ["--pat-fg2" as string]: "rgba(200,140,60,.35)" }}
         />
-        <div style={{ ...wrap, position: "relative", padding: "clamp(60px,9vw,110px) 24px", display: "grid", gap: 40, gridTemplateColumns: "1fr", maxWidth: 960 }}>
-          <div style={{ maxWidth: 640 }}>
-            <Badge tone="gold" style={{ marginBottom: 22 }}>
-              Maison de couture · Gagnoa
-            </Badge>
-            <h1 style={{ fontSize: "clamp(40px, 7vw, 76px)", lineHeight: 1.02, color: "var(--paper)" }}>
+        {/* halo chaleureux + profondeur */}
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(120% 90% at 15% 10%, rgba(200,138,74,.28), transparent 55%), radial-gradient(90% 80% at 100% 100%, rgba(116,80,40,.35), transparent 60%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(20,14,9,.35) 0%, transparent 30%, rgba(20,14,9,.55) 100%)" }} />
+        <div style={{ ...wrap, position: "relative", padding: "clamp(64px,9vw,116px) 24px", display: "grid", gap: 40, gridTemplateColumns: "1fr", maxWidth: 980 }}>
+          <div style={{ maxWidth: 660 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
+              <Badge tone="gold">Maison de couture · Gagnoa</Badge>
+              <span style={{ flex: 1, maxWidth: 90, height: 1, background: "linear-gradient(90deg, rgba(212,175,110,.7), transparent)" }} />
+            </div>
+            <h1 style={{ fontSize: "clamp(42px, 7vw, 80px)", lineHeight: 1.0, color: "var(--paper)", letterSpacing: "0.005em" }}>
               L&apos;élégance du pagne,
               <br />
-              <span style={{ color: "var(--gold)" }}>faite à la main.</span>
+              <span style={{ fontStyle: "italic", color: "var(--gold)" }}>faite à la main.</span>
             </h1>
-            <p style={{ fontSize: "clamp(17px,2.2vw,20px)", color: "rgba(246,239,227,.82)", marginTop: 22, maxWidth: 520 }}>
+            <p style={{ fontSize: "clamp(17px,2.2vw,20px)", color: "rgba(246,239,227,.82)", marginTop: 24, maxWidth: 530, lineHeight: 1.6 }}>
               Wax authentiques, tenues sur mesure pour toute la famille. La Grâce de Dieu habille vos plus beaux moments.
             </p>
-            <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 34 }}>
+            <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 36 }}>
               <Link
                 href="/shop"
                 className="lg-btn"
-                style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--terracotta)", color: "#fff", borderRadius: 999, fontWeight: 600, fontSize: 16, padding: "14px 30px" }}
+                style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--terracotta)", color: "#fff", borderRadius: 999, fontWeight: 600, fontSize: 16, padding: "15px 32px", boxShadow: "0 10px 30px -10px rgba(180,95,55,.6)" }}
               >
                 Découvrir la boutique <Icon name="arrowRight" size={18} />
               </Link>
               <Link
                 href="/shop?cat=pagnes"
                 className="lg-btn"
-                style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "transparent", color: "var(--paper)", border: "1px solid rgba(246,239,227,.35)", borderRadius: 999, fontWeight: 600, fontSize: 16, padding: "14px 30px" }}
+                style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(246,239,227,.06)", color: "var(--paper)", border: "1px solid rgba(246,239,227,.32)", borderRadius: 999, fontWeight: 600, fontSize: 16, padding: "15px 32px", backdropFilter: "blur(4px)" }}
               >
                 Voir les pagnes
               </Link>
             </div>
-            <div style={{ display: "flex", gap: 28, marginTop: 40, flexWrap: "wrap", fontSize: 14 }}>
+            <div style={{ height: 1, background: "linear-gradient(90deg, rgba(246,239,227,.22), transparent)", margin: "40px 0 0", maxWidth: 520 }} />
+            <div style={{ display: "flex", gap: 28, marginTop: 22, flexWrap: "wrap", fontSize: 14 }}>
               {(
                 [
                   ["truck", "Livraison Gagnoa 24-48h"],
-                  ["sparkle", "Nouveaux arrivages chaque semaine"],
-                  ["star", "Cercle fidélité La Grâce de Dieu"],
+                  ["sparkle", "Arrivages chaque semaine"],
+                  ["star", "Cercle fidélité"],
                 ] as const
               ).map(([ic, t]) => (
-                <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "rgba(246,239,227,.8)" }}>
+                <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: 9, color: "rgba(246,239,227,.82)" }}>
                   <span style={{ color: "var(--gold)" }}>
                     <Icon name={ic} size={18} />
                   </span>
@@ -87,10 +92,17 @@ export default async function HomePage() {
                 className="lg-btn lg-card-hover"
                 style={{ padding: 0, border: "1px solid var(--line)", borderRadius: 16, overflow: "hidden", textAlign: "left", background: "var(--paper)", display: "block" }}
               >
-                <ClothImage product={sample} ratio="4 / 3" rounded={0} label={false} />
-                <div style={{ padding: "13px 15px 16px" }}>
-                  <div style={{ fontFamily: "var(--font-marcellus), serif", fontSize: 18 }}>{c.label}</div>
-                  <div style={{ fontSize: 12.5, color: "var(--ink-soft)", marginTop: 3 }}>{c.tagline}</div>
+                <div className="hover-zoom">
+                  <ClothImage product={sample} ratio="4 / 3" rounded={0} label={false} />
+                </div>
+                <div style={{ padding: "14px 16px 16px" }}>
+                  <div style={{ fontFamily: "var(--font-marcellus), serif", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                    {c.label}
+                    <span style={{ color: "var(--terracotta)", opacity: 0.9 }}>
+                      <Icon name="arrowRight" size={15} />
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 12.5, color: "var(--ink-soft)", marginTop: 4 }}>{c.tagline}</div>
                 </div>
               </Link>
             );
