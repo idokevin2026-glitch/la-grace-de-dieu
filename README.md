@@ -41,11 +41,29 @@ Le site est disponible sur `http://localhost:3000`.
 
 ### 4. Créer le premier compte administrateur
 
-1. Créez un compte normal via `/account` (email + mot de passe).
-2. Dans Supabase → **Table Editor** → `profiles`, trouvez la ligne correspondante et passez `role` à `admin`.
-3. Connectez-vous sur `/admin` avec ce compte.
+La méthode recommandée est **entièrement self-service**, sans toucher à Supabase :
 
-Il n'y a **pas de mot de passe administrateur en dur** — l'accès `/admin` exige une session Supabase Auth avec `role = 'admin'`, imposé côté serveur par la RLS et par les routes API (`src/lib/api-auth.ts`).
+1. Renseignez la variable `ADMIN_EMAILS` (dans `.env.local` en local, ou dans les
+   variables d'environnement Vercel en production) avec votre email, ex. :
+   `ADMIN_EMAILS=kevin.ido@yahoo.com`. En production, **redéployez** pour que la
+   variable soit prise en compte.
+2. Allez sur `/admin`, onglet **« Créer un compte »**, renseignez nom, téléphone,
+   email (le même que dans `ADMIN_EMAILS`) et mot de passe.
+3. Connectez-vous : votre compte est **automatiquement promu administrateur**.
+
+> Si Supabase a l'option « Confirm email » activée (Authentication → Providers →
+> Email), vous recevrez un mail de confirmation à cliquer avant de pouvoir vous
+> connecter. Vous pouvez désactiver cette option pour une boutique grand public.
+
+**Méthode manuelle (alternative)** : créez un compte via `/account`, puis dans
+Supabase → **Table Editor** → `profiles`, passez `role` à `admin` pour la ligne
+correspondante.
+
+Il n'y a **pas de mot de passe administrateur en dur** — l'accès `/admin` exige une
+session Supabase Auth avec `role = 'admin'`, imposé côté serveur par la RLS et par
+les routes API (`src/lib/api-auth.ts`). La promotion via `ADMIN_EMAILS` n'affecte
+que l'utilisateur **déjà connecté** et dont l'email figure dans la liste : impossible
+de promouvoir ou de réinitialiser le compte d'un tiers.
 
 ## Intégrations optionnelles
 
