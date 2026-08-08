@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isAdminEmail } from "@/lib/admin-allow";
 
 /**
  * Promotion self-service en administrateur.
@@ -11,23 +12,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * `ADMIN_EMAILS` (définie côté hébergeur, ex. Vercel). Il n'y a donc aucun moyen
  * de promouvoir le compte de quelqu'un d'autre ni de réinitialiser un mot de passe.
  */
-function adminEmails(): string[] {
-  return (process.env.ADMIN_EMAILS || "")
-    .split(/[,\s;]+/)
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-}
-
 export async function POST() {
   const auth = await requireUser();
   if (!auth) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const email = (auth.user.email || "").trim().toLowerCase();
-  const allow = adminEmails();
-
-  // Rien de configuré : on ne fait rien (mais pas d'erreur bloquante).
-  if (allow.length === 0) return NextResponse.json({ promoted: false, reason: "not_configured" });
-  if (!email || !allow.includes(email)) return NextResponse.json({ promoted: false, reason: "not_allowed" });
+  if (!isAdminEmail(auth.user.email)) return NextResponse.json({ promoted: false, reason: "not_allowed" });
 
   let admin;
   try {

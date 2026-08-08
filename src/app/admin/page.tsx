@@ -22,6 +22,24 @@ async function tryPromote(): Promise<boolean> {
   }
 }
 
+/**
+ * Pour un email admin autorisé : confirme le compte (sans dépendre de l'email
+ * Supabase) et le passe admin. Renvoie true si le compte est prêt à se connecter.
+ */
+async function confirmAdmin(email: string): Promise<boolean> {
+  try {
+    const res = await fetch("/api/admin/confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json().catch(() => ({}));
+    return !!data.ok;
+  } catch {
+    return false;
+  }
+}
+
 export default function AdminPage() {
   const { user, profile, loading, signOut, refreshProfile } = useAuth();
   const toast = useToast();
@@ -36,6 +54,13 @@ export default function AdminPage() {
   if (loading) return null;
 
   if (!user) {
+    const welcome = async () => {
+      await tryPromote();
+      await refreshProfile();
+      setBusy(false);
+      toast("Accès administrateur activé.", { tone: "green", icon: "check", title: "Bienvenue" });
+    };
+
     const login = async () => {
       if (!email.trim() || pass.length < 6) {
         toast("Email et mot de passe (6 caractères min.) requis.", { tone: "gold", icon: "x" });
@@ -43,16 +68,19 @@ export default function AdminPage() {
       }
       setBusy(true);
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: pass });
+      let { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: pass });
+      if (error) {
+        // Compte admin autorisé mais non confirmé : on confirme automatiquement puis on réessaie.
+        if (await confirmAdmin(email.trim())) {
+          ({ error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: pass }));
+        }
+      }
       if (error) {
         setBusy(false);
         toast(frAuthError(error.message), { tone: "gold", icon: "x", title: "Connexion impossible" });
         return;
       }
-      const promoted = await tryPromote();
-      await refreshProfile();
-      setBusy(false);
-      if (promoted) toast("Accès administrateur activé.", { tone: "green", icon: "check", title: "Bienvenue" });
+      await welcome();
     };
 
     const signup = async () => {
@@ -71,26 +99,33 @@ export default function AdminPage() {
         password: pass,
         options: { data: { name: name.trim(), phone: phone.trim() } },
       });
-      if (error) {
+
+      // Compte déjà existant, ou confirmation email requise (pas de session) :
+      // pour un email admin autorisé, on confirme côté serveur puis on connecte.
+      const needsHelp = !!error || !data.session;
+      if (needsHelp) {
+        if (await confirmAdmin(email.trim())) {
+          const { error: e2 } = await supabase.auth.signInWithPassword({ email: email.trim(), password: pass });
+          if (!e2) {
+            await welcome();
+            return;
+          }
+        }
         setBusy(false);
-        toast(frAuthError(error.message), { tone: "gold", icon: "x", title: "Création impossible" });
+        if (error) {
+          toast(frAuthError(error.message), { tone: "gold", icon: "x", title: "Création impossible" });
+        } else {
+          toast("Compte créé. Confirmez votre email (lien reçu par mail) puis connectez-vous.", {
+            tone: "gold",
+            icon: "star",
+            title: "Vérifiez votre boîte mail",
+          });
+          setAuthMode("login");
+        }
         return;
       }
-      if (!data.session) {
-        // Confirmation email requise côté Supabase : pas encore de session.
-        setBusy(false);
-        toast("Compte créé. Confirmez votre email (lien reçu par mail) puis connectez-vous.", {
-          tone: "gold",
-          icon: "star",
-          title: "Vérifiez votre boîte mail",
-        });
-        setAuthMode("login");
-        return;
-      }
-      const promoted = await tryPromote();
-      await refreshProfile();
-      setBusy(false);
-      toast(promoted ? "Compte administrateur prêt." : "Compte créé.", { tone: "green", icon: "check", title: "Bienvenue" });
+
+      await welcome();
     };
 
     const submit = authMode === "login" ? login : signup;
