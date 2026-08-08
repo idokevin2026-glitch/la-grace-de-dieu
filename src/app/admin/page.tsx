@@ -48,6 +48,7 @@ export default function AdminPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
+  const [setupCode, setSetupCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<"catalogue" | "commandes">("catalogue");
 
@@ -83,7 +84,39 @@ export default function AdminPage() {
       await welcome();
     };
 
+    // Configuration / réinitialisation sécurisée d'un compte admin via code d'installation.
+    const setupAdmin = async () => {
+      if (!email.trim() || pass.length < 6) {
+        toast("Email et mot de passe (6 caractères min.) requis.", { tone: "gold", icon: "x" });
+        return;
+      }
+      setBusy(true);
+      const res = await fetch("/api/admin/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), password: pass, secret: setupCode.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        setBusy(false);
+        toast(data.error || "Configuration impossible.", { tone: "gold", icon: "x", title: "Échec de la configuration" });
+        return;
+      }
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: pass });
+      if (error) {
+        setBusy(false);
+        toast(frAuthError(error.message), { tone: "gold", icon: "x", title: "Connexion impossible" });
+        return;
+      }
+      await welcome();
+    };
+
     const signup = async () => {
+      // Si un code d'installation est saisi, on passe par la configuration admin sécurisée
+      // (crée le compte au besoin, redéfinit le mot de passe, confirme et donne l'accès admin).
+      if (setupCode.trim()) return setupAdmin();
+
       if (!name.trim() || !/^[0-9 +]{8,}$/.test(phone.trim())) {
         toast("Nom et téléphone valides requis.", { tone: "gold", icon: "x", title: "Champs manquants" });
         return;
@@ -176,6 +209,14 @@ export default function AdminPage() {
             <Field label="Mot de passe">
               <input className="lg-input" type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="6 caractères min." onKeyDown={(e) => e.key === "Enter" && submit()} />
             </Field>
+            {authMode === "signup" && (
+              <Field label="Code d'installation (facultatif)">
+                <input className="lg-input" value={setupCode} onChange={(e) => setSetupCode(e.target.value)} placeholder="Réservé au responsable — laisser vide si vous ne l'avez pas" onKeyDown={(e) => e.key === "Enter" && submit()} />
+                <div style={{ fontSize: 12, color: "var(--ink-soft)", marginTop: 5 }}>
+                  Avec ce code, votre mot de passe est (re)défini et l&apos;accès administrateur activé immédiatement.
+                </div>
+              </Field>
+            )}
             <Button variant="dark" full onClick={submit} disabled={busy}>
               {busy ? "Patientez…" : authMode === "login" ? "Entrer" : "Créer mon compte"}
             </Button>
