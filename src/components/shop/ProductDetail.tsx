@@ -121,7 +121,7 @@ export function ProductDetail({ product, related }: { product: Product; related:
               <Icon name="sparkle" size={18} /> Gagnez {Math.floor(product.price / POINT_RATE)} points fidélité avec cet article
             </span>
             <span style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <Icon name="heart" size={18} /> Confectionné main dans nos ateliers de Gagnoa
+              <Icon name="heart" size={18} /> Article authentique sélectionné par La Grâce de Dieu, Gagnoa
             </span>
           </div>
         </div>

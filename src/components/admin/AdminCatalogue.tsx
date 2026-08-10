@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { ClothImage } from "@/components/ui/ClothImage";
 import { Field } from "@/components/ui/Form";
 import { useToast } from "@/components/providers/ToastProvider";
-import { resizeImageToBlob } from "@/lib/resize-image";
+import { ImageCropper } from "./ImageCropper";
 import { CATEGORIES, SIZES_ADULT, fcfa } from "@/lib/constants";
 import type { Category, Product } from "@/lib/types";
 
@@ -28,6 +28,7 @@ export function AdminCatalogue() {
   const [f, setF] = useState(emptyForm);
   const [editId, setEditId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((s) => ({ ...s, [k]: v }));
@@ -39,12 +40,17 @@ export function AdminCatalogue() {
   };
   useEffect(load, []);
 
-  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Ouvre l'outil de cadrage quand une photo est choisie.
+  const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (file) setPendingFile(file);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  // Envoie la photo cadrée vers le stockage.
+  const uploadBlob = async (blob: Blob) => {
     setBusy(true);
     try {
-      const blob = await resizeImageToBlob(file);
       const form = new FormData();
       form.append("file", blob, "photo.jpg");
       const res = await fetch("/api/admin/upload", { method: "POST", body: form });
@@ -52,7 +58,7 @@ export function AdminCatalogue() {
       if (!res.ok) throw new Error(data.error);
       set("image", data.url);
     } catch {
-      toast("Image illisible ou trop lourde.", { tone: "gold", icon: "x" });
+      toast("Image illisible ou envoi impossible.", { tone: "gold", icon: "x" });
     }
     setBusy(false);
   };
@@ -126,6 +132,16 @@ export function AdminCatalogue() {
 
   return (
     <>
+      {pendingFile && (
+        <ImageCropper
+          file={pendingFile}
+          onCancel={() => setPendingFile(null)}
+          onDone={(blob) => {
+            setPendingFile(null);
+            uploadBlob(blob);
+          }}
+        />
+      )}
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 34 }}>
         {CATEGORIES.map((c) => (
           <div key={c.id} style={{ background: "var(--paper)", border: "1px solid var(--line)", borderRadius: 12, padding: "10px 16px" }}>
