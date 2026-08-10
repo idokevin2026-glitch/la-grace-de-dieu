@@ -31,16 +31,16 @@ export default async function HomePage() {
         <div style={{ ...wrap, position: "relative", padding: "clamp(64px,9vw,116px) 24px", display: "grid", gap: 40, gridTemplateColumns: "1fr", maxWidth: 980 }}>
           <div style={{ maxWidth: 660 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
-              <Badge tone="gold">Maison de couture · Gagnoa</Badge>
+              <Badge tone="gold">Boutique en ligne · Gagnoa</Badge>
               <span style={{ flex: 1, maxWidth: 90, height: 1, background: "linear-gradient(90deg, rgba(212,175,110,.7), transparent)" }} />
             </div>
             <h1 style={{ fontSize: "clamp(42px, 7vw, 80px)", lineHeight: 1.0, color: "var(--paper)", letterSpacing: "0.005em" }}>
-              L&apos;élégance du pagne,
+              L&apos;élégance traditionnelle,
               <br />
-              <span style={{ fontStyle: "italic", color: "var(--gold)" }}>faite à la main.</span>
+              <span style={{ fontStyle: "italic", color: "var(--gold)" }}>pour vos cérémonies.</span>
             </h1>
-            <p style={{ fontSize: "clamp(17px,2.2vw,20px)", color: "rgba(246,239,227,.82)", marginTop: 24, maxWidth: 530, lineHeight: 1.6 }}>
-              Wax authentiques, tenues sur mesure pour toute la famille. La Grâce de Dieu habille vos plus beaux moments.
+            <p style={{ fontSize: "clamp(17px,2.2vw,20px)", color: "rgba(246,239,227,.82)", marginTop: 24, maxWidth: 540, lineHeight: 1.6 }}>
+              Kita tissé main, Adinkra, pagnes, bijoux et accessoires pour vos mariages, baptêmes, dot et fiançailles — et bien plus pour le quotidien.
             </p>
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 36 }}>
               <Link
@@ -51,11 +51,11 @@ export default async function HomePage() {
                 Découvrir la boutique <Icon name="arrowRight" size={18} />
               </Link>
               <Link
-                href="/shop?cat=pagnes"
+                href="/shop?cat=traditionnel"
                 className="lg-btn"
                 style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(246,239,227,.06)", color: "var(--paper)", border: "1px solid rgba(246,239,227,.32)", borderRadius: 999, fontWeight: 600, fontSize: 16, padding: "15px 32px", backdropFilter: "blur(4px)" }}
               >
-                Voir les pagnes
+                Tenues traditionnelles
               </Link>
             </div>
             <div style={{ height: 1, background: "linear-gradient(90deg, rgba(246,239,227,.22), transparent)", margin: "40px 0 0", maxWidth: 520 }} />
@@ -63,7 +63,7 @@ export default async function HomePage() {
               {(
                 [
                   ["truck", "Livraison Gagnoa 24-48h"],
-                  ["sparkle", "Arrivages chaque semaine"],
+                  ["sparkle", "Pièces traditionnelles authentiques"],
                   ["star", "Cercle fidélité"],
                 ] as const
               ).map(([ic, t]) => (

@@ -8,7 +8,7 @@ import { ClothImage } from "@/components/ui/ClothImage";
 import { Field } from "@/components/ui/Form";
 import { useToast } from "@/components/providers/ToastProvider";
 import { resizeImageToBlob } from "@/lib/resize-image";
-import { CATEGORIES, SIZES_ADULT, SIZES_KID, fcfa } from "@/lib/constants";
+import { CATEGORIES, SIZES_ADULT, fcfa } from "@/lib/constants";
 import type { Category, Product } from "@/lib/types";
 
 const emptyForm = {
@@ -79,11 +79,9 @@ export function AdminCatalogue() {
       ? f.sizesText.split(",").map((s) => s.trim()).filter(Boolean)
       : f.category === "pagnes"
         ? ["6 yards"]
-        : f.category === "enfants"
-          ? SIZES_KID
-          : f.category === "accessoires"
-            ? ["Unique"]
-            : SIZES_ADULT;
+        : f.category === "accessoires" || f.category === "bagagerie"
+          ? ["Unique"]
+          : SIZES_ADULT;
     const body = {
       name: f.name.trim(),
       category: f.category,

@@ -57,7 +57,7 @@ create trigger on_auth_user_created
 create table public.products (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  category text not null check (category in ('pagnes', 'femmes', 'hommes', 'enfants', 'accessoires')),
+  category text not null check (category in ('traditionnel', 'pagnes', 'accessoires', 'bagagerie', 'pretaporter')),
   price integer not null check (price >= 0),
   colors text[] not null default '{}',
   sizes text[] not null default '{}',

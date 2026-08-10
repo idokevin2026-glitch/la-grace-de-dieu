@@ -12,7 +12,7 @@ export function Footer() {
         <div>
           <div style={{ fontFamily: "var(--font-marcellus),serif", fontSize: 28, color: "var(--paper)" }}>La Grâce de Dieu</div>
           <p style={{ maxWidth: 320, marginTop: 12, fontSize: 14.5, lineHeight: 1.6 }}>
-            Maison de couture et de pagnes wax à Gagnoa. Nous habillons vos plus beaux moments avec des pièces faites main.
+            Boutique en ligne à Gagnoa : tenues traditionnelles, pagnes, bijoux, chaussures, bagagerie et prêt-à-porter pour vos cérémonies et le quotidien.
           </p>
           <div style={{ display: "flex", gap: 8, marginTop: 18, flexWrap: "wrap" }}>
             {["Wave", "Orange Money", "MTN", "Moov", "Visa"].map((p) => (

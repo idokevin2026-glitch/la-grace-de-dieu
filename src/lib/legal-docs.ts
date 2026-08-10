@@ -5,7 +5,7 @@ export const LEGAL_DOCS: Record<string, { title: string; eyebrow: string; sectio
     sections: [
       [
         "Éditeur du site",
-        "Le site La Grâce de Dieu est édité par l'entreprise La Grâce de Dieu, maison de couture et de vente de pagnes et tenues traditionnelles, située à « La Grâce de Dieu », rue Ottro, en allant vers l'hôpital général, non loin de l'Église des Assemblées de Dieu, à Gagnoa, Côte d'Ivoire. Contact : +225 07 08 65 67 30.",
+        "Le site La Grâce de Dieu est édité par l'entreprise La Grâce de Dieu, boutique en ligne de vente de tenues traditionnelles, pagnes et articles divers, située à « La Grâce de Dieu », rue Ottro, en allant vers l'hôpital général, non loin de l'Église des Assemblées de Dieu, à Gagnoa, Côte d'Ivoire. Contact : +225 07 08 65 67 30.",
       ],
       ["Directeur de publication", "La direction de La Grâce de Dieu assure la responsabilité éditoriale du site et de son contenu."],
       ["Hébergement", "Le site est hébergé par le prestataire technique retenu par La Grâce de Dieu. Toute demande relative à l'hébergement peut être adressée par téléphone ou WhatsApp."],
@@ -45,7 +45,7 @@ export const LEGAL_DOCS: Record<string, { title: string; eyebrow: string; sectio
     sections: [
       [
         "Produits",
-        "La Grâce de Dieu propose des pagnes au mètre, des tenues pour femmes, hommes et enfants ainsi que des accessoires, confectionnés main. Les visuels sont indicatifs ; de légères variations de teinte peuvent exister sur les tissus wax.",
+        "La Grâce de Dieu propose des tenues traditionnelles (Kita tissé main, Adinkra), des pagnes (wax, Hitarget), des bijoux et accessoires, des chaussures traditionnelles, de la bagagerie et du prêt-à-porter. Les visuels sont indicatifs ; de légères variations de teinte peuvent exister sur les tissus.",
       ],
       ["Commandes", "Toute commande passée sur le site vaut acceptation des présentes conditions. Une confirmation « Commande reçue » vous est adressée avec un numéro de suivi (ex. LG-2026-1234)."],
       [

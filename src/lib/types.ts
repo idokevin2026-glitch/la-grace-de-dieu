@@ -1,4 +1,4 @@
-export type Category = "pagnes" | "femmes" | "hommes" | "enfants" | "accessoires";
+export type Category = "traditionnel" | "pagnes" | "accessoires" | "bagagerie" | "pretaporter";
 
 export type OrderStatus = "recue" | "prep" | "route" | "livree";
 

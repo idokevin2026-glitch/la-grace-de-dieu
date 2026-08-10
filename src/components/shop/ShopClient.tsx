@@ -32,7 +32,7 @@ export function ShopClient({ products, initialCat, initialFilterNew }: { product
       <SectionHead
         eyebrow="Boutique"
         title={cat === "all" ? "Tous nos articles" : categoryMeta?.label || "Boutique"}
-        sub={cat === "all" ? "Pagnes, tenues et accessoires faits main." : categoryMeta?.tagline}
+        sub={cat === "all" ? "Tenues traditionnelles, pagnes, bijoux, bagagerie et prêt-à-porter." : categoryMeta?.tagline}
       />
 
       <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center", margin: "28px 0 8px" }}>

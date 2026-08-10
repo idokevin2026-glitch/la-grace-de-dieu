@@ -20,8 +20,8 @@ const karla = Karla({
 });
 
 export const metadata: Metadata = {
-  title: "La Grâce de Dieu — Élégance en pagne",
-  description: "Maison de couture et de pagnes wax à Gagnoa, Côte d'Ivoire. Pagnes, tenues femmes, hommes et enfants, accessoires, confection sur-mesure.",
+  title: "La Grâce de Dieu — Tenues traditionnelles & cérémonies",
+  description: "Boutique en ligne à Gagnoa, Côte d'Ivoire. Tenues traditionnelles (Kita tissé main, Adinkra), pagnes wax et Hitarget, bijoux, chaussures, bagagerie et prêt-à-porter pour vos mariages, baptêmes, dot et fiançailles.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

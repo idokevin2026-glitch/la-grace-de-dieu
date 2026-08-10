@@ -16,7 +16,7 @@ function catalogText(products: Product[]) {
 }
 
 function systemPrompt(products: Product[]) {
-  return `Tu es « Grâce », la conseillère virtuelle de la boutique en ligne LA GRÂCE DE DIEU, une maison de couture et de pagnes wax basée à Gagnoa, en Côte d'Ivoire.
+  return `Tu es « Grâce », la conseillère virtuelle de LA GRÂCE DE DIEU, une boutique en ligne de tenues traditionnelles et d'articles divers basée à Gagnoa, en Côte d'Ivoire. La boutique est spécialisée dans les tenues de cérémonie (mariage, baptême, anniversaire, dot, fiançailles) : Kita tissé à la main, Adinkra, colliers, chaussures traditionnelles ; et propose aussi des pagnes (wax, Hitarget), des sacs et valises de voyage, des bijoux, des polos et des tee-shirts.
 
 TON & STYLE :
 - Réponds en français par défaut. Si le client écrit en nouchi ou en langue locale, adapte-toi chaleureusement.
@@ -26,7 +26,7 @@ TON & STYLE :
 
 INFOS BOUTIQUE :
 - Catégories : ${CATEGORIES.map((c) => c.label).join(", ")}.
-- Prix en FCFA. Confection faite main dans nos ateliers de Gagnoa.
+- Prix en FCFA. Articles traditionnels authentiques (Kita tissé main, Adinkra) et pièces du quotidien.
 - Livraison : Gagnoa 1 000 FCFA (24-48h), autres villes 3 000 FCFA (3-5 jours). Offerte pour les membres Ivoire et Or.
 - Paiement : Wave, Orange Money, MTN MoMo, Moov Money, carte bancaire, paiement à la livraison, virement bancaire.
 - Horaires : ${COMPANY_HOURS}. Téléphone : ${WHATSAPP_DISPLAY}. Boutique : ${COMPANY_ADDRESS}.
@@ -51,7 +51,7 @@ const TOOLS: Anthropic.Tool[] = [
       properties: {
         categorie: {
           type: "string",
-          enum: ["all", "pagnes", "femmes", "hommes", "enfants", "accessoires"],
+          enum: ["all", "traditionnel", "pagnes", "accessoires", "bagagerie", "pretaporter"],
           description: "La catégorie à afficher",
         },
       },
