@@ -56,16 +56,21 @@ export function ImageCropper({
   }, []);
 
   const coverScale = nat && viewW ? Math.max(viewW / nat.w, viewH / nat.h) : 1;
+  const containScale = nat && viewW ? Math.min(viewW / nat.w, viewH / nat.h) : 1;
+  // zoom = 1 correspond à « remplir le cadre » ; on autorise à dézoomer jusqu'à voir toute la photo.
+  const minZoom = coverScale ? Math.min(1, containScale / coverScale) : 1;
   const dw = nat ? nat.w * coverScale * zoom : 0;
   const dh = nat ? nat.h * coverScale * zoom : 0;
 
+  // Déplacement libre : la photo peut aller d'un bord à l'autre du cadre
+  // (avec du blanc si elle est plus petite que le cadre dans un sens).
   const clampPan = useCallback(
     (x: number, y: number, z: number) => {
       if (!nat || !viewW) return { x: 0, y: 0 };
       const w = nat.w * coverScale * z;
       const h = nat.h * coverScale * z;
-      const maxX = Math.max(0, (w - viewW) / 2);
-      const maxY = Math.max(0, (h - viewH) / 2);
+      const maxX = Math.abs(w - viewW) / 2;
+      const maxY = Math.abs(h - viewH) / 2;
       return {
         x: Math.max(-maxX, Math.min(maxX, x)),
         y: Math.max(-maxY, Math.min(maxY, y)),
@@ -160,7 +165,7 @@ export function ImageCropper({
             aspectRatio: String(aspect),
             overflow: "hidden",
             borderRadius: 12,
-            background: "var(--paper-2)",
+            background: "#fff",
             cursor: "grab",
             touchAction: "none",
             userSelect: "none",
@@ -197,7 +202,7 @@ export function ImageCropper({
           <Icon name="search" size={16} />
           <input
             type="range"
-            min={1}
+            min={minZoom}
             max={3}
             step={0.01}
             value={zoom}
