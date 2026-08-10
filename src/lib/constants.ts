@@ -1,11 +1,11 @@
 import type { Category, PaymentMethod } from "./types";
 
 export const CATEGORIES: { id: Category; label: string; tagline: string }[] = [
-  { id: "pagnes", label: "Pagnes au mètre", tagline: "Wax authentiques, vendus en 6 yards" },
-  { id: "femmes", label: "Tenues Femmes", tagline: "Robes, ensembles & boubous" },
-  { id: "hommes", label: "Tenues Hommes", tagline: "Boubous, chemises & complets" },
-  { id: "enfants", label: "Tenues Enfants", tagline: "Petits élégants en pagne" },
-  { id: "accessoires", label: "Accessoires", tagline: "Foulards, sacs & bijoux" },
+  { id: "traditionnel", label: "Tenues traditionnelles", tagline: "Kita tissé main & Adinkra pour vos cérémonies" },
+  { id: "pagnes", label: "Pagnes", tagline: "Wax et Hitarget au mètre" },
+  { id: "accessoires", label: "Bijoux & Accessoires", tagline: "Colliers, bijoux & chaussures traditionnelles" },
+  { id: "bagagerie", label: "Bagagerie", tagline: "Sacs et valises de voyage" },
+  { id: "pretaporter", label: "Prêt-à-porter", tagline: "Polos & tee-shirts" },
 ];
 
 export const SIZES_ADULT = ["S", "M", "L", "XL", "XXL"];
