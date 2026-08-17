@@ -1,0 +1,1217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VESPERTINE, perfume made from flowers that only open after dark</title>
+<meta name="description" content="Three perfumes built from night blooming flowers, at extrait strength. Smell all three for $14 before you commit to a bottle.">
+<meta name="theme-color" content="#0B0806">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VESPERTINE">
+<meta property="og:description" content="Perfume made from flowers that only open after dark. Try all three for $14.">
+<meta property="og:image" content="https://d2ol7oe51mr4n9.cloudfront.net/user_3I2rrLtqnKASefbRbaeup4iaYjz/292af7bc-9db7-449a-9c44-f75468bab30f.jpg">
+<meta property="og:url" content="">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230B0806'/><path d='M13 7h6v3l3 4v11H10V14l3-4z' fill='none' stroke='%23C8963E' stroke-width='1.6'/></svg>">
+<link rel="preload" href="assets/fonts/bodoni-moda.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/jost.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Type served from this folder. No third party request, nothing to wait on. */
+@font-face{
+  font-family:'Bodoni Moda';font-style:normal;font-weight:400 700;font-display:swap;
+  src:url(assets/fonts/bodoni-moda.woff2) format('woff2-variations');
+}
+@font-face{
+  font-family:'Jost';font-style:normal;font-weight:200 600;font-display:swap;
+  src:url(assets/fonts/jost.woff2) format('woff2-variations');
+}
+/* ============================================================
+   VESPERTINE
+   Palette, type and motion tokens. Everything else derives.
+   ============================================================ */
+:root{
+  --ink:#0B0806;
+  --ink-2:#150F0B;
+  --ink-3:#1D1410;
+  --wine:#2A1116;
+  --night:#3B2A48;
+  --amber:#C8963E;
+  --amber-hi:#E8C173;
+  --bone:#EDE3D2;
+  --bone-dim:rgba(237,227,210,.62);
+  --bone-faint:rgba(237,227,210,.34);
+  --hair:rgba(237,227,210,.13);
+
+  --display:"Bodoni Moda",Georgia,"Times New Roman",serif;
+  --body:"Jost",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --ease-out:cubic-bezier(.16,1,.3,1);
+
+  --gut:clamp(20px,5vw,64px);
+  --maxw:1180px;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--ink);
+  color:var(--bone);
+  font-family:var(--body);
+  font-weight:300;
+  font-size:clamp(16px,1.05vw,18px);
+  line-height:1.65;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+img,video,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+::selection{background:var(--amber);color:var(--ink)}
+
+/* ---------- The fixed background environment layer ---------- */
+.env{position:fixed;inset:0;z-index:0;pointer-events:none}
+.env-wash{
+  position:absolute;inset:-20%;
+  background:
+    radial-gradient(60% 45% at 18% 12%, rgba(59,42,72,.30), transparent 62%),
+    radial-gradient(55% 50% at 84% 78%, rgba(42,17,22,.42), transparent 64%),
+    radial-gradient(80% 60% at 50% 50%, rgba(200,150,62,.045), transparent 70%);
+  animation:drift 46s var(--ease) infinite alternate;
+}
+@keyframes drift{
+  from{transform:translate3d(-1.5%,-1%,0) scale(1.02)}
+  to{transform:translate3d(1.5%,1.5%,0) scale(1.07)}
+}
+#dust{position:absolute;inset:0;width:100%;height:100%;opacity:.5}
+
+/* ---------- The signature element: the amber spine ---------- */
+.spine{
+  position:fixed;left:max(14px,2.2vw);top:0;bottom:0;width:2px;z-index:3;
+  pointer-events:none;display:none;
+}
+@media(min-width:1080px){.spine{display:block}}
+.spine-track{position:absolute;inset:0;background:var(--hair)}
+.spine-fill{
+  position:absolute;left:0;top:0;width:100%;height:0%;
+  background:linear-gradient(to bottom,transparent,var(--amber) 18%,var(--amber-hi));
+  box-shadow:0 0 14px rgba(200,150,62,.55);
+}
+.spine-node{
+  position:absolute;left:50%;width:7px;height:7px;margin-left:-3.5px;margin-top:-3.5px;
+  border-radius:50%;background:var(--ink);border:1px solid var(--hair);
+  transition:background .5s var(--ease),border-color .5s var(--ease),box-shadow .5s var(--ease);
+}
+.spine-node.lit{background:var(--amber-hi);border-color:var(--amber-hi);box-shadow:0 0 12px rgba(232,193,115,.8)}
+
+/* ---------- Nav ---------- */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:24px;padding:16px var(--gut);
+  background:linear-gradient(to bottom,rgba(11,8,6,.92),rgba(11,8,6,0));
+  transform:translateY(-102%);
+  transition:transform .7s var(--ease-out);
+}
+.nav.show{transform:none}
+.nav-mark{
+  font-family:var(--display);font-size:19px;letter-spacing:.34em;
+  text-indent:.34em;font-weight:500;
+}
+.nav-links{display:none;gap:34px;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--bone-dim)}
+@media(min-width:940px){.nav-links{display:flex}}
+.nav-links a{position:relative;padding-bottom:3px;transition:color .35s var(--ease)}
+.nav-links a::after{
+  content:"";position:absolute;left:0;right:100%;bottom:0;height:1px;
+  background:var(--amber);transition:right .45s var(--ease);
+}
+.nav-links a:hover{color:var(--bone)}
+.nav-links a:hover::after{right:0}
+
+.btn{
+  display:inline-flex;align-items:center;gap:11px;
+  padding:13px 24px;border:1px solid var(--amber);
+  color:var(--amber-hi);
+  font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:400;
+  position:relative;overflow:hidden;white-space:nowrap;
+  transition:color .45s var(--ease),border-color .45s var(--ease);
+}
+.btn::before{
+  content:"";position:absolute;inset:0;background:var(--amber);
+  transform:scaleX(0);transform-origin:left;transition:transform .55s var(--ease-out);
+}
+.btn span{position:relative;z-index:1}
+.btn:hover{color:var(--ink);border-color:var(--amber)}
+.btn:hover::before{transform:scaleX(1)}
+.btn-solid{background:var(--amber);color:var(--ink);border-color:var(--amber)}
+.btn-solid::before{background:var(--amber-hi)}
+.btn-solid:hover{color:var(--ink)}
+
+/* ============================================================
+   THE SCRUB HERO
+   ============================================================ */
+.hero{position:relative;z-index:2;height:520vh}
+.hero.static-hero{height:100svh}
+.stage{
+  position:sticky;top:0;height:100svh;overflow:hidden;
+  background:var(--ink);
+}
+.stage-media{position:absolute;inset:0}
+.stage-media video,.stage-media img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;
+}
+.stage-media video{opacity:0;transition:opacity 1.1s var(--ease)}
+.stage-media video.live{opacity:1}
+.poster{
+  opacity:0;transition:opacity 1.4s var(--ease);
+  transform:scale(1.04);
+}
+.poster.in{opacity:1}
+.static-hero .poster{
+  animation:posterDrift 26s var(--ease) infinite alternate;
+}
+@keyframes posterDrift{from{transform:scale(1.04)}to{transform:scale(1.13)}}
+
+/* the scrim system: every band gets readable ground */
+.scrim{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(120% 70% at 50% 108%, rgba(11,8,6,.92), transparent 62%),
+    radial-gradient(100% 60% at 50% -8%, rgba(11,8,6,.80), transparent 58%),
+    linear-gradient(to right, rgba(11,8,6,.42), transparent 22%, transparent 78%, rgba(11,8,6,.42));
+}
+.vignette{
+  position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 220px 60px rgba(11,8,6,.85);
+}
+.grain{
+  position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* caption bands */
+.bands{position:absolute;inset:0;pointer-events:none}
+.band{
+  position:absolute;left:0;right:0;top:58%;
+  transform:translateY(-50%);
+  padding:0 var(--gut);
+  text-align:center;
+  opacity:0;visibility:hidden;
+}
+/* every line carries its own ground, so it stays readable
+   over whatever frame the scroll happens to land on */
+.band::before{
+  content:"";position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  width:min(1180px,94vw);height:min(460px,56vh);
+  background:radial-gradient(closest-side,rgba(11,8,6,.86),rgba(11,8,6,.5) 52%,transparent 76%);
+  pointer-events:none;
+}
+.band p{
+  position:relative;
+  margin:0 auto;max-width:16ch;
+  font-family:var(--display);
+  font-size:clamp(30px,5.6vw,74px);
+  font-weight:400;line-height:1.08;letter-spacing:-.012em;
+  text-shadow:0 2px 40px rgba(11,8,6,.95),0 0 90px rgba(11,8,6,.7);
+}
+.band .w{display:inline-block;transform:translateY(.42em);opacity:0}
+.band.on .w{
+  transform:none;opacity:1;
+  transition:transform 1s var(--ease-out),opacity 1s var(--ease-out);
+}
+.band .w:nth-child(2){transition-delay:.07s}
+.band .w:nth-child(3){transition-delay:.14s}
+.band .w:nth-child(4){transition-delay:.21s}
+.band .w:nth-child(5){transition-delay:.28s}
+.band .w:nth-child(6){transition-delay:.35s}
+.band .w:nth-child(7){transition-delay:.42s}
+
+/* the settle */
+.settle{
+  position:absolute;left:0;right:0;bottom:9%;
+  padding:0 var(--gut);text-align:center;
+  opacity:0;visibility:hidden;
+}
+.settle.on{opacity:1;visibility:visible}
+.settle-mark{
+  font-family:var(--display);
+  font-size:clamp(38px,8.4vw,112px);
+  letter-spacing:.2em;text-indent:.2em;
+  font-weight:400;line-height:1;margin:0 0 20px;
+  text-shadow:0 0 70px rgba(11,8,6,.9);
+}
+.settle-sub{
+  margin:0 auto 30px;max-width:34ch;
+  font-size:clamp(14px,1.5vw,17px);color:var(--bone-dim);
+  letter-spacing:.02em;
+}
+.settle .reveal{opacity:0;transform:translateY(22px)}
+.settle.on .reveal{opacity:1;transform:none;transition:opacity 1s var(--ease-out),transform 1s var(--ease-out)}
+.settle.on .settle-sub{transition-delay:.16s}
+.settle.on .settle-cta{transition-delay:.3s}
+
+.hint{
+  position:absolute;left:50%;bottom:26px;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:9px;
+  font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--bone-faint);
+  transition:opacity .7s var(--ease);
+}
+.hint i{display:block;width:1px;height:38px;background:linear-gradient(to bottom,var(--amber),transparent);animation:hintPulse 2.4s var(--ease) infinite}
+@keyframes hintPulse{0%,100%{transform:scaleY(.4);opacity:.35;transform-origin:top}50%{transform:scaleY(1);opacity:1;transform-origin:top}}
+.hint.gone{opacity:0}
+
+/* loading ring */
+.loader{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:46px;height:46px;opacity:0;transition:opacity .5s var(--ease);
+}
+.loader.on{opacity:1}
+.loader svg{transform:rotate(-90deg)}
+.loader circle{fill:none;stroke-width:1.4}
+.loader .bg{stroke:var(--hair)}
+.loader .fg{stroke:var(--amber);stroke-linecap:round;transition:stroke-dashoffset .3s linear}
+
+/* ============================================================
+   THE PAGE BELOW
+   ============================================================ */
+.page{position:relative;z-index:2;background:var(--ink)}
+.sec{padding:clamp(88px,13vh,168px) var(--gut);position:relative}
+.wrap{max-width:var(--maxw);margin:0 auto}
+.narrow{max-width:760px}
+
+.label{
+  display:flex;align-items:center;gap:14px;
+  font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--amber);font-weight:500;margin-bottom:26px;
+}
+.label::after{content:"";flex:1;height:1px;background:linear-gradient(to right,rgba(200,150,62,.5),transparent)}
+
+h2{
+  font-family:var(--display);font-weight:400;
+  font-size:clamp(29px,4.6vw,62px);line-height:1.1;letter-spacing:-.012em;
+  margin:0 0 24px;
+}
+h3{font-family:var(--display);font-weight:400;font-size:clamp(21px,2.3vw,29px);line-height:1.2;margin:0 0 10px}
+.lede{font-size:clamp(16px,1.35vw,19px);color:var(--bone-dim);max-width:62ch;margin:0 0 18px}
+.sub{color:var(--bone-dim);margin:0 0 34px;max-width:56ch}
+
+/* scroll reveal */
+.rise{opacity:0;transform:translateY(30px)}
+.rise.seen{opacity:1;transform:none;transition:opacity 1s var(--ease-out),transform 1s var(--ease-out)}
+.rise.d1.seen{transition-delay:.1s}
+.rise.d2.seen{transition-delay:.2s}
+.rise.d3.seen{transition-delay:.3s}
+
+/* shelf divider motif */
+.shelf{position:relative;height:1px;background:var(--hair);margin:0 var(--gut);max-width:var(--maxw)}
+.shelf::before,.shelf::after{
+  content:"";position:absolute;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;
+  background:var(--amber);box-shadow:0 0 10px rgba(200,150,62,.7);opacity:.75;
+}
+.shelf::before{left:12%}
+.shelf::after{right:12%}
+
+/* ---------- 01 The house ---------- */
+.house{display:grid;gap:clamp(34px,5vw,70px);align-items:center}
+@media(min-width:940px){.house{grid-template-columns:1.05fr .95fr}}
+.bottle-art{width:100%;max-width:340px;margin:0 auto}
+.bottle-art path,.bottle-art line,.bottle-art circle{
+  fill:none;stroke:var(--amber);stroke-width:1.1;
+  stroke-dasharray:var(--len);stroke-dashoffset:var(--len);
+}
+.bottle-art.drawn path,.bottle-art.drawn line,.bottle-art.drawn circle{
+  stroke-dashoffset:0;transition:stroke-dashoffset 2.4s var(--ease-out);
+}
+.bottle-art.drawn .s2{transition-delay:.35s}
+.bottle-art.drawn .s3{transition-delay:.7s}
+.bottle-art .glow{filter:drop-shadow(0 0 8px rgba(200,150,62,.55))}
+
+/* framed photography */
+.frame{position:relative;overflow:hidden;border:1px solid var(--hair)}
+.frame img{width:100%;height:100%;object-fit:cover;transform:scale(1.02);transition:transform 1.6s var(--ease)}
+.frame:hover img{transform:scale(1.06)}
+.frame::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(11,8,6,.5),transparent 45%);
+}
+.frame-cap{
+  position:absolute;left:0;right:0;bottom:0;padding:18px 20px;
+  font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--bone-dim);
+}
+
+/* full bleed plate */
+.plate{position:relative;height:min(78vh,620px);overflow:hidden;z-index:2}
+.plate img{width:100%;height:100%;object-fit:cover}
+.plate::after{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(to bottom,var(--ink),transparent 26%,transparent 62%,var(--ink)),
+    radial-gradient(70% 60% at 50% 50%,transparent 40%,rgba(11,8,6,.55));
+}
+.plate-line{
+  position:absolute;left:0;right:0;bottom:12%;z-index:1;
+  padding:0 var(--gut);text-align:center;
+  font-family:var(--display);font-size:clamp(20px,3.2vw,40px);line-height:1.25;
+  text-shadow:0 2px 40px rgba(11,8,6,.95);
+}
+
+/* ---------- 02 The collection ---------- */
+.grid3{display:grid;gap:22px}
+@media(min-width:820px){.grid3{grid-template-columns:repeat(3,1fr)}}
+.card{
+  border:1px solid var(--hair);background:linear-gradient(170deg,var(--ink-2),var(--ink));
+  padding:34px 28px 30px;position:relative;overflow:hidden;
+  transition:border-color .6s var(--ease),transform .6s var(--ease-out);
+}
+.card::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:1px;
+  background:linear-gradient(to right,transparent,var(--amber),transparent);
+  transform:scaleX(0);transition:transform .8s var(--ease-out);
+}
+.card:hover{border-color:rgba(200,150,62,.4);transform:translateY(-4px)}
+.card:hover::before{transform:scaleX(1)}
+.card-no{
+  font-size:10.5px;letter-spacing:.3em;color:var(--amber);text-transform:uppercase;
+  display:block;margin-bottom:16px;
+}
+.notes{
+  list-style:none;padding:0;margin:18px 0 0;
+  font-size:13.5px;color:var(--bone-dim);letter-spacing:.04em;
+}
+.notes li{padding:7px 0;border-top:1px solid var(--hair)}
+.card-line{font-size:14.5px;color:var(--bone-dim);font-style:italic;margin:0}
+
+/* ---------- 03 Why it stays ---------- */
+.stats{display:grid;gap:2px;margin-top:44px;background:var(--hair)}
+@media(min-width:720px){.stats{grid-template-columns:repeat(3,1fr)}}
+.stat{background:var(--ink);padding:32px 24px;text-align:center}
+.stat b{
+  display:block;font-family:var(--display);font-weight:400;
+  font-size:clamp(34px,4.6vw,54px);line-height:1;color:var(--amber-hi);margin-bottom:9px;
+}
+.stat span{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--bone-dim)}
+
+/* ---------- 04 The interactive moment ---------- */
+.picker{display:grid;gap:14px;margin-bottom:34px}
+@media(min-width:820px){.picker{grid-template-columns:repeat(3,1fr)}}
+.pick{
+  border:1px solid var(--hair);background:var(--ink-2);
+  padding:30px 24px;text-align:left;position:relative;overflow:hidden;
+  font-family:var(--display);font-size:clamp(18px,2vw,24px);line-height:1.25;
+  transition:border-color .5s var(--ease),background .5s var(--ease),color .5s var(--ease);
+}
+.pick::after{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(80% 100% at 50% 100%,rgba(200,150,62,.18),transparent 70%);
+  opacity:0;transition:opacity .6s var(--ease);
+}
+.pick:hover{border-color:rgba(200,150,62,.42)}
+.pick[aria-pressed="true"]{border-color:var(--amber);background:var(--ink-3)}
+.pick[aria-pressed="true"]::after{opacity:1}
+.pick em{
+  display:block;font-family:var(--body);font-style:normal;
+  font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:14px;
+}
+.result{
+  border:1px solid var(--hair);border-left:2px solid var(--amber);
+  background:linear-gradient(100deg,rgba(200,150,62,.07),transparent 55%);
+  padding:clamp(26px,3.6vw,42px);
+  min-height:150px;
+}
+.result[hidden]{display:none}
+.result .rin{opacity:0;transform:translateY(14px);animation:rin .8s var(--ease-out) forwards}
+@keyframes rin{to{opacity:1;transform:none}}
+.result-notes{font-size:14px;color:var(--bone-dim);letter-spacing:.05em;margin:14px 0 0}
+.result-empty{color:var(--bone-faint);font-size:14px;letter-spacing:.05em}
+
+/* ---------- 05 How it works ---------- */
+.steps{counter-reset:s;display:grid;gap:2px;background:var(--hair)}
+@media(min-width:860px){.steps{grid-template-columns:repeat(3,1fr)}}
+.step{background:var(--ink);padding:38px 30px;position:relative}
+.step::before{
+  counter-increment:s;content:"0" counter(s);
+  font-family:var(--display);font-size:13px;letter-spacing:.2em;color:var(--amber);
+  display:block;margin-bottom:20px;
+}
+.step p{margin:0;color:var(--bone-dim);font-size:15px}
+
+/* ---------- 06 Price ---------- */
+.prices{display:grid;gap:22px}
+@media(min-width:820px){.prices{grid-template-columns:1.08fr 1fr;align-items:stretch}}
+.price{
+  border:1px solid var(--hair);padding:clamp(30px,4vw,46px);
+  display:flex;flex-direction:column;
+  background:linear-gradient(165deg,var(--ink-2),var(--ink));
+}
+.price.hero-price{border-color:rgba(200,150,62,.42);box-shadow:0 0 60px rgba(200,150,62,.06) inset}
+.price-tag{
+  font-family:var(--display);font-size:clamp(42px,6vw,68px);line-height:1;
+  margin:6px 0 18px;color:var(--bone);
+}
+.price.hero-price .price-tag{color:var(--amber-hi)}
+.price p{color:var(--bone-dim);margin:0 0 26px;font-size:15px}
+.price .btn{align-self:flex-start;margin-top:auto}
+
+/* ---------- 07 Questions ---------- */
+.q{border-top:1px solid var(--hair)}
+.q:last-of-type{border-bottom:1px solid var(--hair)}
+.q-btn{
+  width:100%;text-align:left;display:flex;align-items:baseline;gap:20px;
+  padding:26px 0;font-family:var(--display);
+  font-size:clamp(17px,1.9vw,23px);line-height:1.3;
+  transition:color .4s var(--ease);
+}
+.q-btn:hover{color:var(--amber-hi)}
+.q-btn i{
+  flex:none;width:11px;height:11px;position:relative;margin-top:6px;
+}
+.q-btn i::before,.q-btn i::after{
+  content:"";position:absolute;background:var(--amber);transition:transform .45s var(--ease)
+}
+.q-btn i::before{left:0;right:0;top:5px;height:1px}
+.q-btn i::after{top:0;bottom:0;left:5px;width:1px}
+.q-btn[aria-expanded="true"] i::after{transform:scaleY(0)}
+.q-panel{overflow:hidden;height:0;transition:height .55s var(--ease-out)}
+.q-panel p{margin:0 0 26px;color:var(--bone-dim);max-width:64ch;padding-right:30px}
+
+/* ---------- 08 Final CTA ---------- */
+.final{text-align:center;position:relative;overflow:hidden}
+.final::before{
+  content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(900px,120vw);height:min(900px,120vw);
+  background:radial-gradient(circle,rgba(200,150,62,.10),transparent 62%);
+  pointer-events:none;
+}
+.form{
+  display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+  max-width:560px;margin:34px auto 14px;position:relative;
+}
+.form input{
+  flex:1 1 260px;background:transparent;border:1px solid var(--hair);
+  color:var(--bone);padding:15px 18px;font:inherit;font-size:15px;
+  transition:border-color .4s var(--ease);
+}
+.form input::placeholder{color:var(--bone-faint)}
+.form input:focus{outline:none;border-color:var(--amber)}
+.form-note{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--bone-faint);margin:0}
+.thanks{
+  max-width:460px;margin:34px auto 0;padding:26px;
+  border:1px solid rgba(200,150,62,.4);
+  background:rgba(200,150,62,.05);
+}
+.thanks[hidden]{display:none}
+.thanks p{margin:0;color:var(--bone-dim)}
+.thanks strong{color:var(--amber-hi);font-weight:400;display:block;margin-bottom:8px;font-family:var(--display);font-size:20px}
+
+/* ---------- Footer ---------- */
+footer{
+  border-top:1px solid var(--hair);
+  padding:56px var(--gut) 44px;position:relative;z-index:2;background:var(--ink);
+}
+.foot{display:flex;flex-wrap:wrap;gap:26px;justify-content:space-between;align-items:flex-start;max-width:var(--maxw);margin:0 auto}
+.foot-mark{font-family:var(--display);letter-spacing:.34em;text-indent:.34em;font-size:16px}
+.foot-links{display:flex;flex-wrap:wrap;gap:26px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--bone-dim)}
+.foot-links a:hover{color:var(--amber-hi)}
+.disclosure{
+  max-width:var(--maxw);margin:38px auto 0;padding-top:24px;border-top:1px solid var(--hair);
+  font-size:12.5px;color:var(--bone-faint);line-height:1.7;
+}
+
+/* ---------- Reduced motion ---------- */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  .rise{opacity:1;transform:none}
+  .band .w{opacity:1;transform:none}
+  .settle .reveal{opacity:1;transform:none}
+  .env-wash{animation:none}
+}
+</style>
+</head>
+<body>
+
+<div class="env" aria-hidden="true">
+  <div class="env-wash"></div>
+  <canvas id="dust"></canvas>
+</div>
+
+<div class="spine" aria-hidden="true">
+  <div class="spine-track"></div>
+  <div class="spine-fill" id="spineFill"></div>
+</div>
+
+<nav class="nav" id="nav">
+  <a href="#top" class="nav-mark">VESPERTINE</a>
+  <div class="nav-links">
+    <a href="#house">The House</a>
+    <a href="#collection">The Collection</a>
+    <a href="#price">Price</a>
+    <a href="#questions">Questions</a>
+  </div>
+  <a href="#start" class="btn"><span>Discovery set $14</span></a>
+</nav>
+
+<!-- ============ THE SCRUB HERO ============ -->
+<header class="hero" id="top">
+  <div class="stage">
+    <div class="stage-media">
+      <img class="poster" id="poster" alt="" decoding="async">
+      <video id="film" playsinline muted preload="auto" disablepictureinpicture></video>
+    </div>
+    <div class="scrim"></div>
+    <div class="vignette"></div>
+    <div class="grain"></div>
+
+    <div class="loader" id="loader" aria-hidden="true">
+      <svg width="46" height="46" viewBox="0 0 46 46">
+        <circle class="bg" cx="23" cy="23" r="20"></circle>
+        <circle class="fg" id="ring" cx="23" cy="23" r="20" stroke-dasharray="125.6" stroke-dashoffset="125.6"></circle>
+      </svg>
+    </div>
+
+    <div class="bands" id="bands">
+      <div class="band" data-from="0.04" data-to="0.20"><p>Some flowers wait for dark.</p></div>
+      <div class="band" data-from="0.22" data-to="0.42"><p>So we work at night.</p></div>
+      <div class="band" data-from="0.44" data-to="0.62"><p>Forty seven nights to a single bottle.</p></div>
+      <div class="band" data-from="0.64" data-to="0.80"><p>Then one is finished.</p></div>
+    </div>
+
+    <div class="settle" id="settle">
+      <h1 class="settle-mark reveal">VESPERTINE</h1>
+      <p class="settle-sub reveal">Perfume made from flowers that only open after dark.</p>
+      <a href="#start" class="btn btn-solid settle-cta reveal"><span>Try all three for $14</span></a>
+    </div>
+
+    <div class="hint" id="hint" aria-hidden="true"><i></i>Scroll</div>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ============ 01 THE HOUSE ============ -->
+  <section class="sec" id="house">
+    <div class="wrap house">
+      <div>
+        <p class="label rise">01 / The House</p>
+        <h2 class="rise d1">We only work with flowers that open at night.</h2>
+        <p class="lede rise d2">Night flowers are not shy. They are loud. They have to be, because the moths that carry their pollen fly in the dark and cannot see a thing, so the scent has to do all the work.</p>
+        <p class="lede rise d3">Jasmine sambac opens at dusk and gives everything it has by midnight. We pick it then, in the dark, by hand, because by morning most of it is gone.</p>
+      </div>
+      <div class="rise d2">
+        <figure class="frame" id="flowerFrame" style="aspect-ratio:4/5;margin:0">
+          <img id="flowerImg" alt="A jasmine sambac flower open in the dark, lit from one side" loading="lazy" decoding="async">
+          <figcaption class="frame-cap">Jasmine sambac, picked at midnight</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- the resting frame, reused as a design image -->
+  <div class="plate">
+    <img id="plateImg" alt="One perfume bottle alone on a lit stone plinth" loading="lazy" decoding="async">
+    <p class="plate-line rise">Forty seven nights. One bottle.</p>
+  </div>
+
+  <!-- ============ 02 THE COLLECTION ============ -->
+  <section class="sec" id="collection">
+    <div class="wrap">
+      <p class="label rise">02 / The Collection</p>
+      <h2 class="rise d1">Three nights. Three perfumes.</h2>
+      <p class="sub rise d2">Small batches. Numbered by the night the flowers were picked.</p>
+      <div class="grid3">
+        <article class="card rise d1">
+          <span class="card-no">Nuit 01</span>
+          <h3>Jasmine Sambac</h3>
+          <p class="card-line">A courtyard in July, an hour after the heat breaks.</p>
+          <ul class="notes"><li>Jasmine sambac</li><li>Green fig</li><li>White musk</li><li>Warm skin</li></ul>
+        </article>
+        <article class="card rise d2">
+          <span class="card-no">Nuit 02</span>
+          <h3>Tuberose &amp; Smoke</h3>
+          <p class="card-line">A room where the fire went out an hour ago.</p>
+          <ul class="notes"><li>Tuberose</li><li>Birch tar</li><li>Black tea</li><li>Cedar</li></ul>
+        </article>
+        <article class="card rise d3">
+          <span class="card-no">Nuit 03</span>
+          <h3>Amber Vespers</h3>
+          <p class="card-line">Skin, and whatever it was wearing.</p>
+          <ul class="notes"><li>Labdanum</li><li>Tonka</li><li>Incense resin</li><li>Vanilla bourbon</li></ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <div class="shelf"></div>
+
+  <!-- ============ 03 WHY IT STAYS ============ -->
+  <section class="sec" id="stays">
+    <div class="wrap house">
+      <div>
+        <p class="label rise">03 / Why It Stays</p>
+        <h2 class="rise d1">You will still smell it at midnight.</h2>
+        <p class="lede rise d2">Most perfume disappears in an hour because it is mostly alcohol and a little oil. Ours runs at 22 percent oil, which is extrait strength. That is why the bottle is small and the price is what it is.</p>
+        <p class="lede rise d3">Two sprays in the morning, and it is still there when you take your coat off at night.</p>
+      </div>
+      <div class="rise d2">
+        <svg class="bottle-art" id="bottleArt" viewBox="0 0 200 300" role="img" aria-label="Line drawing of the faceted VESPERTINE bottle">
+          <path class="s1 glow" d="M82 44 h36 v22 l14 8 v14 h-64 v-14 l14 -8 z"/>
+          <path class="s2" d="M68 88 h64 c14 12 20 30 20 52 v112 c0 18 -10 28 -26 28 h-52 c-16 0 -26 -10 -26 -28 v-112 c0 -22 6 -40 20 -52 z"/>
+          <line class="s3" x1="100" y1="88" x2="100" y2="280"/>
+          <line class="s3" x1="52" y1="150" x2="148" y2="150"/>
+          <line class="s3" x1="52" y1="212" x2="148" y2="212"/>
+          <circle class="s3" cx="100" cy="150" r="17"/>
+        </svg>
+      </div>
+    </div>
+    <div class="wrap" style="margin-top:clamp(34px,5vw,64px)">
+      <div class="stats rise d1">
+        <div class="stat"><b>22%</b><span>Perfume oil</span></div>
+        <div class="stat"><b>8&ndash;12</b><span>Hours on skin</span></div>
+        <div class="stat"><b>400</b><span>Bottles a batch</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="shelf"></div>
+
+  <!-- ============ 04 FIND YOURS (interactive) ============ -->
+  <section class="sec" id="find">
+    <div class="wrap">
+      <p class="label rise">04 / Find Yours</p>
+      <h2 class="rise d1">Which night are you?</h2>
+      <p class="sub rise d2">Pick the one you would want to walk into.</p>
+      <div class="picker rise d2" role="group" aria-label="Pick a night">
+        <button class="pick" type="button" aria-pressed="false" data-n="0"><em>One</em>A courtyard in July</button>
+        <button class="pick" type="button" aria-pressed="false" data-n="1"><em>Two</em>A room after the fire went out</button>
+        <button class="pick" type="button" aria-pressed="false" data-n="2"><em>Three</em>Skin, an hour after</button>
+      </div>
+      <div class="result rise d3" id="result" aria-live="polite">
+        <p class="result-empty">Pick one above and we will tell you which bottle it is.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="shelf"></div>
+
+  <!-- ============ 05 HOW IT WORKS ============ -->
+  <section class="sec" id="how">
+    <div class="wrap">
+      <p class="label rise">05 / How It Works</p>
+      <h2 class="rise d1">Smell it first. Obviously.</h2>
+      <div class="steps rise d2">
+        <div class="step"><h3>We send all three.</h3><p>Three 2ml vials, enough for about a week of wearing each one properly.</p></div>
+        <div class="step"><h3>You live with them.</h3><p>Not on a paper strip. On your skin, on a normal day, at 6pm when it matters.</p></div>
+        <div class="step"><h3>The $14 comes off.</h3><p>Pick your bottle and we take the $14 straight off it. If none of them are yours, keep the vials and tell us why.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="shelf"></div>
+
+  <!-- ============ 06 PRICE ============ -->
+  <section class="sec" id="price">
+    <div class="wrap">
+      <p class="label rise">06 / Price</p>
+      <h2 class="rise d1">Two ways in. Start with the cheap one.</h2>
+      <div class="prices">
+        <div class="price hero-price rise d1">
+          <h3>The Discovery Set</h3>
+          <div class="price-tag">$14</div>
+          <p>Three 2ml vials, free shipping, and the $14 comes off your first bottle.</p>
+          <a href="#start" class="btn btn-solid"><span>Send me the set</span></a>
+        </div>
+        <div class="price rise d2">
+          <h3>A Full Bottle</h3>
+          <div class="price-tag">$185</div>
+          <p>50ml extrait at 22 percent oil, numbered batch, refill at $140.</p>
+          <a href="#start" class="btn"><span>Start with the vials</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="shelf"></div>
+
+  <!-- ============ 07 QUESTIONS ============ -->
+  <section class="sec" id="questions">
+    <div class="wrap narrow">
+      <p class="label rise">07 / Questions</p>
+      <h2 class="rise d1">The ones people actually ask.</h2>
+      <div class="rise d2" id="faq">
+        <div class="q">
+          <button class="q-btn" type="button" aria-expanded="false"><i></i>What if I hate all three?</button>
+          <div class="q-panel"><p>Then you are out fourteen dollars and we are out three vials. Keep them. Tell us what went wrong and we will point you somewhere better, even if it is not us.</p></div>
+        </div>
+        <div class="q">
+          <button class="q-btn" type="button" aria-expanded="false"><i></i>How long does it actually last?</button>
+          <div class="q-panel"><p>Eight to twelve hours on most skin. Less if your skin runs dry, so put it on after moisturiser.</p></div>
+        </div>
+        <div class="q">
+          <button class="q-btn" type="button" aria-expanded="false"><i></i>Is this just repackaged oil?</button>
+          <div class="q-panel"><p>No. Three perfumers, one lab in Grasse, formulas we own. The batch number on your bottle tells you the night the jasmine was picked.</p></div>
+        </div>
+        <div class="q">
+          <button class="q-btn" type="button" aria-expanded="false"><i></i>Will I smell like everyone else?</button>
+          <div class="q-panel"><p>We make about 400 bottles a batch. You will not run into yourself at dinner.</p></div>
+        </div>
+        <div class="q">
+          <button class="q-btn" type="button" aria-expanded="false"><i></i>Why is the bottle so small?</button>
+          <div class="q-panel"><p>Extrait is strong. 50ml at two sprays a day lasts most people over a year.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 08 START ============ -->
+  <section class="sec final" id="start">
+    <div class="wrap narrow">
+      <p class="label rise" style="justify-content:center">08 / Start</p>
+      <h2 class="rise d1">Start with the vials.</h2>
+      <p class="sub rise d2" style="margin-left:auto;margin-right:auto">Three nights, $14, and it comes off your first bottle.</p>
+      <form class="form rise d2" id="form" novalidate>
+        <input type="email" id="email" placeholder="your email" aria-label="Your email" required>
+        <button class="btn btn-solid" type="submit"><span>Send me the discovery set</span></button>
+      </form>
+      <p class="form-note rise d3">One email, no list, no follow ups.</p>
+      <div class="thanks" id="thanks" hidden>
+        <p><strong>That is all we needed.</strong>Your three vials would be on their way. VESPERTINE is a design demonstration, so nothing was actually sent and your address was not stored anywhere.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="foot">
+    <a href="#top" class="foot-mark">VESPERTINE</a>
+    <div class="foot-links">
+      <a href="#house">The House</a>
+      <a href="#collection">The Collection</a>
+      <a href="#price">Price</a>
+      <a href="#questions">Questions</a>
+      <a href="#start">Discovery set</a>
+    </div>
+  </div>
+  <p class="disclosure">VESPERTINE is an imaginary perfume house, made as a design demonstration. Nothing here is for sale, no order can be placed, and no email is collected or stored. Every image on this page was generated with AI.</p>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   MEDIA. One place to change every asset the page loads.
+   ============================================================ */
+var CDN = "https://d2ol7oe51mr4n9.cloudfront.net/user_3I2rrLtqnKASefbRbaeup4iaYjz/";
+var MEDIA = {
+  video : CDN + "76f49812-4edd-428d-a385-c0524306be2b.mp4", // the scrub, 3.9s
+  poster: CDN + "36ea9349-0ddf-43b4-83eb-50708ab75c2d.jpg", // frame one, the corridor
+  bottle: CDN + "292af7bc-9db7-449a-9c44-f75468bab30f.jpg", // the resting frame
+  flower: CDN + "e9fa3550-2eb4-45c3-86aa-e8029599592d.jpg"  // jasmine sambac
+};
+
+/* The scroll point where the camera has arrived and the film comes to rest.
+   Measured from the delivered footage, not guessed. */
+var SETTLE_AT = 0.82;
+
+var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+var $  = function(s,r){return (r||document).querySelector(s)};
+var $$ = function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var clamp = function(v,a,b){return v<a?a:v>b?b:v};
+
+/* ============================================================
+   THE FIVE GATES. Any one of these serves the still hero.
+   ============================================================ */
+function staticHero(){
+  if (reduce) return true;                                        // 1 reduced motion
+  if (innerWidth < 900) return true;                              // 2 phones and small tablets
+  if (matchMedia("(pointer: coarse)").matches) return true;       // 3 touch first devices
+  var c = navigator.connection;
+  if (c && (c.saveData || /2g/.test(c.effectiveType||""))) return true; // 4 metered or slow
+  if (!MEDIA.video) return true;                                  // 5 no film to play
+  return false;
+}
+
+/* ============================================================
+   POSTER. Painted whatever happens, under the film.
+   ============================================================ */
+var poster = $("#poster");
+/* The scrub hero opens on frame one. The still hero shows the composed
+   ending instead, because that is the image the journey was built to land on. */
+var posterSrc = staticHero() ? (MEDIA.bottle || MEDIA.poster) : MEDIA.poster;
+if (posterSrc){
+  poster.src = posterSrc;
+  if (poster.complete) poster.classList.add("in");
+  else poster.addEventListener("load", function(){ poster.classList.add("in") });
+  poster.addEventListener("error", function(){ poster.remove() });
+}
+
+/* Photography in the page. If a picture never arrives its holder steps
+   aside rather than leaving a hole. */
+[["#plateImg", MEDIA.bottle, ".plate"], ["#flowerImg", MEDIA.flower, "#flowerFrame"]]
+.forEach(function(row){
+  var img = $(row[0]);
+  if (!img) return;
+  if (!row[1]){ var h0 = $(row[2]); if (h0) h0.remove(); return }
+  img.src = row[1];
+  img.addEventListener("error", function(){ var h = $(row[2]); if (h) h.remove() });
+});
+
+/* ============================================================
+   WORD SPLIT for the caption bands
+   ============================================================ */
+$$(".band p").forEach(function(p){
+  p.innerHTML = p.textContent.trim().split(/\s+/).map(function(w){
+    return '<span class="w">'+w+'</span>';
+  }).join(" ");
+});
+
+/* ============================================================
+   THE SCRUB ENGINE
+   ============================================================ */
+var hero   = $("#top");
+var film   = $("#film");
+var bands  = $$(".band");
+var settle = $("#settle");
+var hint   = $("#hint");
+var loader = $("#loader");
+var ring   = $("#ring");
+var RING   = 125.6;
+
+var isStatic = staticHero();
+var progress = 0;      // 0..1 down the hero
+var shown    = 0;      // the time currently painted
+var target   = 0;      // the time we are easing toward
+var seeking  = false;
+var ready    = false;
+var duration = 0;
+var running  = false;
+var lastBand = -2;
+var lastSettle = null;
+
+function heroProgress(){
+  var span = hero.offsetHeight - innerHeight;
+  if (span <= 0) return 0;
+  return clamp(-hero.getBoundingClientRect().top / span, 0, 1);
+}
+
+/* A still hero has nothing to scrub, so it is composed once: the name,
+   the line and the call to action, straight away. */
+function composeStill(){
+  for (var i=0;i<bands.length;i++){
+    bands[i].classList.remove("on");
+    bands[i].style.opacity = "0";
+    bands[i].style.visibility = "hidden";
+  }
+  settle.classList.add("on");
+  settle.style.visibility = "visible";
+  hint.classList.add("gone");
+  lastBand = -1; lastSettle = true;
+}
+
+/* bands and settle are written only when the state actually changes */
+function paintBands(p){
+  if (hero.classList.contains("static-hero")) return;
+  var active = -1;
+  for (var i=0;i<bands.length;i++){
+    var b = bands[i];
+    if (p >= +b.dataset.from && p <= +b.dataset.to){ active = i; break }
+  }
+  if (active !== lastBand){
+    for (var j=0;j<bands.length;j++){
+      var on = j === active;
+      var el = bands[j];
+      el.classList.toggle("on", on);
+      el.style.opacity    = on ? "1" : "0";
+      el.style.visibility = on ? "visible" : "hidden";
+      el.style.transition = "opacity .75s cubic-bezier(.22,.61,.36,1)";
+    }
+    lastBand = active;
+  }
+  var settleOn = p >= SETTLE_AT;
+  if (settleOn !== lastSettle){
+    settle.classList.toggle("on", settleOn);
+    settle.style.visibility = settleOn ? "visible" : "hidden";
+    settle.style.transition = "opacity .8s cubic-bezier(.22,.61,.36,1)";
+    lastSettle = settleOn;
+  }
+  hint.classList.toggle("gone", p > 0.03);
+}
+
+/* one seek at a time, never stacked */
+function seek(t){
+  if (seeking || !ready) return;
+  if (Math.abs(film.currentTime - t) < 0.012) return;
+  seeking = true;
+  try { film.currentTime = t } catch(e){ seeking = false }
+}
+/* If the film cannot play, collapse to the designed still hero instead of
+   leaving a five screen scroll over a frozen frame. */
+var fellBack = false;
+function fallBackToStill(){
+  if (fellBack) return;
+  fellBack = true;
+  ready = false;
+  loader.classList.remove("on");
+  hero.classList.add("static-hero");
+  if (film){ film.classList.remove("live"); film.removeAttribute("src"); }
+  if (poster && MEDIA.bottle && poster.src !== MEDIA.bottle) poster.src = MEDIA.bottle;
+  composeStill();
+  onScroll();
+}
+
+if (film){
+  film.addEventListener("seeked", function(){ seeking = false });
+  film.addEventListener("error", fallBackToStill);
+}
+
+/* the rAF loop rests when nothing is moving */
+function tick(){
+  var d = target - shown;
+  if (Math.abs(d) < 0.004){ shown = target; running = false; seek(shown); return }
+  shown += d * 0.16;
+  seek(shown);
+  requestAnimationFrame(tick);
+}
+function wake(){ if (!running){ running = true; requestAnimationFrame(tick) } }
+
+function onScroll(){
+  progress = heroProgress();
+  paintBands(progress);
+  if (ready && duration){
+    target = progress * duration;
+    wake();
+  }
+  spine();
+}
+
+/* ============================================================
+   LOADING THE FILM. Blob first, direct source second,
+   the designed still last. The page is finished either way.
+   ============================================================ */
+function playFilm(url){
+  film.addEventListener("loadedmetadata", function(){
+    if (!film.duration || !isFinite(film.duration)) return fallBackToStill();
+    duration = film.duration;
+    ready = true;
+    film.classList.add("live");
+    loader.classList.remove("on");
+    onScroll();
+  }, {once:true});
+  film.src = url;
+  film.load();
+}
+
+function loadFilm(){
+  if (isStatic || !MEDIA.video){ hero.classList.add("static-hero"); composeStill(); return }
+  loader.classList.add("on");
+
+  fetch(MEDIA.video).then(function(res){
+    if (!res.ok) throw new Error("bad response");
+    var total = +res.headers.get("content-length") || 0;
+    var type  = res.headers.get("content-type") || "video/mp4";
+    if (!res.body || !total) return res.blob();
+    var reader = res.body.getReader(), parts = [], got = 0;
+    return new Promise(function(resolve, reject){
+      (function pump(){
+        reader.read().then(function(r){
+          if (r.done){ resolve(new Blob(parts,{type:type})); return }
+          parts.push(r.value); got += r.value.length;
+          ring.style.strokeDashoffset = RING * (1 - got/total);
+          pump();
+        }).catch(reject);
+      })();
+    });
+  })
+  .then(function(blob){ playFilm(URL.createObjectURL(blob)) })
+  .catch(function(){
+    /* cross origin rules can block the fetch. A plain source still seeks. */
+    playFilm(MEDIA.video);
+  });
+
+/* whatever path we took, do not spin forever */
+setTimeout(function(){ if (!ready) fallBackToStill() }, 12000);
+}
+
+if (isStatic) hero.classList.add("static-hero");
+loadFilm();
+addEventListener("scroll", onScroll, {passive:true});
+addEventListener("resize", function(){ isStatic = staticHero(); onScroll() }, {passive:true});
+
+/* ============================================================
+   THE SPINE. Draws itself down the page.
+   ============================================================ */
+var fill = $("#spineFill");
+var nodes = [];
+function buildNodes(){
+  $$(".spine-node").forEach(function(n){ n.remove() });
+  nodes = [];
+  var doc = document.documentElement.scrollHeight - innerHeight;
+  if (doc <= 0) return;
+  $$("main .sec").forEach(function(sec){
+    var n = document.createElement("i");
+    n.className = "spine-node";
+    n.style.top = ((sec.offsetTop + 120) / (doc + innerHeight) * 100) + "%";
+    n.dataset.at = sec.offsetTop;
+    $(".spine").appendChild(n);
+    nodes.push(n);
+  });
+}
+function spine(){
+  var doc = document.documentElement.scrollHeight - innerHeight;
+  if (doc <= 0) return;
+  var p = clamp(scrollY / doc, 0, 1);
+  fill.style.height = (p*100) + "%";
+  var y = scrollY + innerHeight * 0.55;
+  for (var i=0;i<nodes.length;i++) nodes[i].classList.toggle("lit", y > +nodes[i].dataset.at);
+}
+
+/* ============================================================
+   NAV, reveals, and the drawn bottle
+   ============================================================ */
+var nav = $("#nav");
+addEventListener("scroll", function(){
+  nav.classList.toggle("show", scrollY > innerHeight * 0.7);
+}, {passive:true});
+
+var io = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if (!e.isIntersecting) return;
+    e.target.classList.add("seen");
+    io.unobserve(e.target);
+  });
+}, {threshold:.14, rootMargin:"0px 0px -8% 0px"});
+$$(".rise").forEach(function(el){ io.observe(el) });
+
+var art = $("#bottleArt");
+if (art){
+  $$("path,line,circle", art).forEach(function(s){
+    var len = 0;
+    try { len = s.getTotalLength() } catch(e){ len = 600 }
+    s.style.setProperty("--len", Math.ceil(len));
+  });
+  new IntersectionObserver(function(es,ob){
+    es.forEach(function(e){ if (e.isIntersecting){ art.classList.add("drawn"); ob.disconnect() } });
+  }, {threshold:.3}).observe(art);
+}
+
+/* ============================================================
+   THE INTERACTIVE MOMENT
+   ============================================================ */
+var SCENTS = [
+  {no:"Nuit 01", name:"Jasmine Sambac",  notes:"Jasmine sambac, green fig, white musk, warm skin.",
+   line:"Warm, green and a little indecent. The one people lean in for."},
+  {no:"Nuit 02", name:"Tuberose &amp; Smoke", notes:"Tuberose, birch tar, black tea, cedar.",
+   line:"Flowers with soot on them. The one people remember a week later."},
+  {no:"Nuit 03", name:"Amber Vespers",   notes:"Labdanum, tonka, incense resin, vanilla bourbon.",
+   line:"Close to the skin and slow to leave. The one people ask about."}
+];
+var result = $("#result");
+$$(".pick").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    $$(".pick").forEach(function(b){ b.setAttribute("aria-pressed", b === btn ? "true" : "false") });
+    var s = SCENTS[+btn.dataset.n];
+    result.innerHTML =
+      '<div class="rin">' +
+        '<span class="card-no">'+s.no+'</span>' +
+        '<h3>'+s.name+'</h3>' +
+        '<p class="card-line">'+s.line+'</p>' +
+        '<p class="result-notes">'+s.notes+'</p>' +
+      '</div>';
+  });
+});
+
+/* ============================================================
+   QUESTIONS
+   ============================================================ */
+$$(".q-btn").forEach(function(btn){
+  var panel = btn.nextElementSibling;
+  btn.addEventListener("click", function(){
+    var open = btn.getAttribute("aria-expanded") === "true";
+    $$(".q-btn").forEach(function(o){
+      o.setAttribute("aria-expanded","false");
+      o.nextElementSibling.style.height = "0px";
+    });
+    if (!open){
+      btn.setAttribute("aria-expanded","true");
+      panel.style.height = panel.scrollHeight + "px";
+    }
+  });
+});
+
+/* ============================================================
+   THE FORM. No backend, and the page says so.
+   ============================================================ */
+var form = $("#form"), thanks = $("#thanks");
+form.addEventListener("submit", function(e){
+  e.preventDefault();
+  var email = $("#email");
+  if (!email.value || email.value.indexOf("@") < 1){
+    email.style.borderColor = "#C8963E";
+    email.focus();
+    return;
+  }
+  form.hidden = true;
+  thanks.hidden = false;
+  thanks.scrollIntoView({behavior: reduce ? "auto" : "smooth", block:"center"});
+});
+
+/* ============================================================
+   DUST. Whisper level, and it stops when asked to.
+   ============================================================ */
+(function(){
+  var cv = $("#dust");
+  if (!cv || reduce) return;
+  var ctx = cv.getContext("2d"), motes = [], w = 0, h = 0, dpr = Math.min(devicePixelRatio||1, 2);
+  function size(){
+    w = cv.clientWidth; h = cv.clientHeight;
+    cv.width = w*dpr; cv.height = h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+    var n = Math.round(Math.min(w,1600)/16);
+    motes = [];
+    for (var i=0;i<n;i++) motes.push({
+      x:Math.random()*w, y:Math.random()*h,
+      r:Math.random()*1.5+.35,
+      s:Math.random()*.16+.03,
+      d:Math.random()*.24-.12,
+      a:Math.random()*.35+.08
+    });
+  }
+  function frame(){
+    ctx.clearRect(0,0,w,h);
+    for (var i=0;i<motes.length;i++){
+      var m = motes[i];
+      m.y -= m.s; m.x += m.d;
+      if (m.y < -6){ m.y = h+6; m.x = Math.random()*w }
+      if (m.x < -6) m.x = w+6; else if (m.x > w+6) m.x = -6;
+      ctx.beginPath();
+      ctx.arc(m.x, m.y, m.r, 0, 6.283);
+      ctx.fillStyle = "rgba(232,193,115," + m.a + ")";
+      ctx.fill();
+    }
+    requestAnimationFrame(frame);
+  }
+  size(); addEventListener("resize", size, {passive:true}); frame();
+})();
+
+/* ============================================================
+   Smooth in page links
+   ============================================================ */
+$$('a[href^="#"]').forEach(function(a){
+  a.addEventListener("click", function(e){
+    var t = document.querySelector(a.getAttribute("href"));
+    if (!t) return;
+    e.preventDefault();
+    t.scrollIntoView({behavior: reduce ? "auto" : "smooth", block:"start"});
+  });
+});
+
+/* go */
+addEventListener("load", function(){ buildNodes(); spine(); onScroll() });
+buildNodes(); onScroll();
+
+})();
+</script>
+</body>
+</html>
