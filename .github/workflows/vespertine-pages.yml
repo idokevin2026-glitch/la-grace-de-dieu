@@ -24,15 +24,13 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
+      # Pages is already switched on for this repository, so configure-pages
+      # is not needed. Fewer actions to fetch also means fewer chances to hit
+      # GitHub's action download rate limit.
+      - uses: actions/checkout@v5
 
       - name: Upload the site folder
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: vespertine
 
