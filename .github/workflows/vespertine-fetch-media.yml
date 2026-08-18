@@ -2,6 +2,10 @@ name: Fetch VESPERTINE media into the repo
 
 on:
   workflow_dispatch:
+  push:
+    branches: [claude/perfume-shop-website-qky6f2]
+    paths:
+      - '.github/workflows/vespertine-fetch-media.yml'
 
 permissions:
   contents: write
