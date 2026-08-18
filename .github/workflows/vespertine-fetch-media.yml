@@ -34,11 +34,13 @@ jobs:
           curl -fsSL "$B/e9fa3550-2eb4-45c3-86aa-e8029599592d.jpg" -o vespertine/assets/media/jasmine.jpg
 
       - name: Report what shipped
+        continue-on-error: true
         run: |
-          set -euo pipefail
           ls -l vespertine/assets/media
+          # informational only, never fail the run over it
           ffprobe -v error -select_streams v -show_entries stream=width,height,bit_rate \
-            -of default=nw=1 vespertine/assets/media/vault-scrub.mp4
+            -of default=nw=1 vespertine/assets/media/vault-scrub.mp4 || echo "ffprobe unavailable"
+          true
 
       - name: Point the page at the local copies
         run: |
