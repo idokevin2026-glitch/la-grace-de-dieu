@@ -18,53 +18,45 @@ jobs:
         with:
           ref: claude/perfume-shop-website-qky6f2
 
-      - name: Download the ORIGINAL renders
+      - name: Download the media
         run: |
           set -euo pipefail
-          # generation CDN, the untouched model output rather than a web encode
-          G=https://d8j0ntlcm91z4.cloudfront.net/user_3I2rrLtqnKASefbRbaeup4iaYjz
-          mkdir -p vespertine/assets/media raw
-          curl -fsSL "$G/hf_20260817_141542_14dc0515-ee7b-4147-92ca-d6ce59b0f9df.mp4" -o raw/vault.mp4
-          curl -fsSL "$G/hf_20260817_140620_a9c7c8fa-d6fe-4bbd-a45f-e7039eb2d9fe.png" -o raw/vault-frame1.png
-          curl -fsSL "$G/hf_20260817_143225_c24739a5-d8b3-44c8-9ee3-473b6260d087.png" -o raw/jasmine.png
-          echo "--- source ---"
-          ls -l raw
-          ffprobe -v error -select_streams v -show_entries stream=width,height,bit_rate -of default=nw=1 raw/vault.mp4
+          # Everything here is already encoded for the web. The scroll film is
+          # rebuilt from the original render at 1600x900 and 6.7 Mbps, roughly
+          # three times the bitrate of the first pass, which is what removed the
+          # soft, smeared look. GitHub runners cannot reach the generation CDN,
+          # so the re-encode happens upstream and lands here.
+          B=https://d2ol7oe51mr4n9.cloudfront.net/user_3I2rrLtqnKASefbRbaeup4iaYjz
+          mkdir -p vespertine/assets/media
+          curl -fsSL "$B/f11254ad-f8d5-4f4b-95b0-d85a940fda01.mp4" -o vespertine/assets/media/vault-scrub.mp4
+          curl -fsSL "$B/329f9dd4-f4bc-4c4c-b1ef-5f1a0c346a76.jpg" -o vespertine/assets/media/bottle.jpg
+          curl -fsSL "$B/36ea9349-0ddf-43b4-83eb-50708ab75c2d.jpg" -o vespertine/assets/media/vault-poster.jpg
+          curl -fsSL "$B/e9fa3550-2eb4-45c3-86aa-e8029599592d.jpg" -o vespertine/assets/media/jasmine.jpg
 
-      - name: Re-encode the scroll film at high quality
+      - name: Report what shipped
         run: |
           set -euo pipefail
-          # 1600x900 with a lanczos scaler and gentle sharpening, encoded far above
-          # the previous web pass so the compression mush goes away. Short GOP is
-          # kept because scroll scrubbing seeks constantly.
-          ffmpeg -v error -i raw/vault.mp4 -t 3.9 -an \
-            -vf "scale=1600:900:flags=lanczos,unsharp=5:5:0.7:5:5:0.0" \
-            -c:v libx264 -preset veryslow -crf 20 -g 8 -keyint_min 8 -sc_threshold 0 \
-            -pix_fmt yuv420p -movflags +faststart \
-            vespertine/assets/media/vault-scrub.mp4 -y
-
-      - name: Rebuild the stills from the originals
-        run: |
-          set -euo pipefail
-          # poster is frame one of the corridor, at full generated resolution
-          ffmpeg -v error -i raw/vault-frame1.png -vf "scale=1920:-2:flags=lanczos" -q:v 2 \
-            vespertine/assets/media/vault-poster.jpg -y
-          # the resting frame, taken from the original film and sharpened to match
-          ffmpeg -v error -ss 3.75 -i raw/vault.mp4 -frames:v 1 \
-            -vf "scale=1920:-2:flags=lanczos,unsharp=5:5:0.7:5:5:0.0" -q:v 2 \
-            vespertine/assets/media/bottle.jpg -y
-          ffmpeg -v error -i raw/jasmine.png -vf "crop=ih*4/5:ih,scale=1200:-2:flags=lanczos" -q:v 3 \
-            vespertine/assets/media/jasmine.jpg -y
-          echo "--- shipped ---"
           ls -l vespertine/assets/media
-          ffprobe -v error -select_streams v -show_entries stream=width,height,bit_rate -of default=nw=1 vespertine/assets/media/vault-scrub.mp4
+          ffprobe -v error -select_streams v -show_entries stream=width,height,bit_rate \
+            -of default=nw=1 vespertine/assets/media/vault-scrub.mp4
+
+      - name: Point the page at the local copies
+        run: |
+          set -euo pipefail
+          F=vespertine/index.html
+          sed -i 's|^var CDN = .*|var CDN = "assets/media/";|' "$F"
+          sed -i 's|CDN + "[0-9a-f-]*\.mp4"|CDN + "vault-scrub.mp4"|' "$F"
+          sed -i 's|CDN + "36ea9349-0ddf-43b4-83eb-50708ab75c2d.jpg"|CDN + "vault-poster.jpg"|' "$F"
+          sed -i 's|CDN + "[0-9a-f-]*\.jpg"; // the resting frame|CDN + "bottle.jpg"; // the resting frame|' "$F"
+          sed -i 's|CDN + "e9fa3550-2eb4-45c3-86aa-e8029599592d.jpg"|CDN + "jasmine.jpg"|' "$F"
+          grep -n 'CDN + "' "$F" || true
+          echo "remaining cloudfront refs:"; grep -c 'cloudfront' "$F" || true
 
       - name: Commit
         run: |
           set -euo pipefail
-          rm -rf raw
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add vespertine/assets/media
-          git commit -m "Re-encode the scroll film from the original render at high quality" || echo "nothing to commit"
+          git add vespertine/assets/media vespertine/index.html
+          git commit -m "Ship the high bitrate scroll film and sharper stills" || echo "nothing to commit"
           git push origin HEAD:claude/perfume-shop-website-qky6f2
