@@ -1,0 +1,48 @@
+name: Fetch VESPERTINE media into the repo
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: claude/perfume-shop-website-qky6f2
+
+      - name: Download the generated media
+        run: |
+          set -euo pipefail
+          B=https://d2ol7oe51mr4n9.cloudfront.net/user_3I2rrLtqnKASefbRbaeup4iaYjz
+          mkdir -p vespertine/assets/media
+          curl -fsSL "$B/76f49812-4edd-428d-a385-c0524306be2b.mp4" -o vespertine/assets/media/vault-scrub.mp4
+          curl -fsSL "$B/36ea9349-0ddf-43b4-83eb-50708ab75c2d.jpg" -o vespertine/assets/media/vault-poster.jpg
+          curl -fsSL "$B/292af7bc-9db7-449a-9c44-f75468bab30f.jpg" -o vespertine/assets/media/bottle.jpg
+          curl -fsSL "$B/e9fa3550-2eb4-45c3-86aa-e8029599592d.jpg" -o vespertine/assets/media/jasmine.jpg
+          ls -l vespertine/assets/media
+
+      - name: Point the page at the local copies
+        run: |
+          set -euo pipefail
+          F=vespertine/index.html
+          sed -i 's|^var CDN = .*|var CDN = "assets/media/";|' "$F"
+          sed -i 's|CDN + "76f49812-4edd-428d-a385-c0524306be2b.mp4"|CDN + "vault-scrub.mp4"|' "$F"
+          sed -i 's|CDN + "36ea9349-0ddf-43b4-83eb-50708ab75c2d.jpg"|CDN + "vault-poster.jpg"|' "$F"
+          sed -i 's|CDN + "292af7bc-9db7-449a-9c44-f75468bab30f.jpg"|CDN + "bottle.jpg"|' "$F"
+          sed -i 's|CDN + "e9fa3550-2eb4-45c3-86aa-e8029599592d.jpg"|CDN + "jasmine.jpg"|' "$F"
+          sed -i 's|content="https://d2ol7oe51mr4n9.cloudfront.net/user_3I2rrLtqnKASefbRbaeup4iaYjz/292af7bc-9db7-449a-9c44-f75468bab30f.jpg"|content="assets/media/bottle.jpg"|' "$F"
+          grep -n 'var CDN' "$F"
+          grep -c 'cloudfront' "$F" || true
+
+      - name: Commit
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vespertine/assets/media vespertine/index.html
+          git commit -m "Bring the generated media into the repo and serve it locally"
+          git push origin HEAD:claude/perfume-shop-website-qky6f2
