@@ -38,6 +38,23 @@ ffmpeg -i source.mp4 -an -vf "scale=1920:-2,fps=30" \
   -movflags +faststart assets/video/hero-scrub.mp4
 ```
 
+## Ce que le logo raconte
+
+L'arbre est un fromager, le géant des forêts de Gagnoa. Ce n'est pas un ornement, c'est
+l'organigramme du groupe, et la page s'en sert partout :
+
+- **les contreforts** : l'ancrage à Gagnoa ;
+- **le tronc unique** : la holding ;
+- **l'arc terre cuite** : l'immobilier, le bâti ;
+- **l'arc crème** : la santé, le soin ;
+- **l'arc or** : la grande distribution, l'échange ;
+- **la barre dorée** : le capital.
+
+Les trois piliers du programme présenté sur la page, Les Résidences, La Clinique et
+La Galerie, sont exactement ces trois métiers. Chaque carte reprend la couleur de son
+étage de canopée, et la section « Le fromager de Gagnoa » explique la lecture avec un
+logo dont chaque partie s'allume au survol de sa ligne.
+
 ## Remplacer le logo par ton fichier d'origine
 
 Le logo de la page est une **version vectorielle redessinée** de la marque IKK Group,
@@ -101,15 +118,16 @@ Sur un téléphone simulé, réseau bridé à 1,6 Mbit/s et processeur ralenti q
 
 | Mesure | Valeur |
 |---|---|
-| Poids total chargé | 227 Ko |
-| Premier affichage | 1,8 s |
-| Page prête | 2,0 s |
-| Images par seconde pendant le défilement du héros | 58 |
+| Poids total chargé | 235 Ko |
+| Premier affichage | 2,1 s |
+| Page prête | 2,2 s |
+| Images par seconde pendant le défilement du héros | 57 |
 
 Les polices représentent 122 Ko de ce total. Elles sont hébergées avec le site, donc
 aucune requête ne part vers un autre domaine.
 
 Ces chiffres sont mesurés sans compression, parce que le petit serveur de test n'en
-fait pas. Un vrai hébergeur compresse le code : 44 Ko de HTML deviennent 11 Ko, 36 Ko
+fait pas. Un vrai hébergeur compresse le code : 48 Ko de HTML deviennent 12 Ko, 40 Ko
 de CSS deviennent 9 Ko, 24 Ko de JavaScript deviennent 7 Ko. Soit 28 Ko de code au
-lieu de 112, et un poids réel autour de 150 Ko.
+lieu de 112, et un poids réel autour de 150 Ko. C'est là que se joue l'essentiel du
+premier affichage.

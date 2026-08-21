@@ -70,6 +70,7 @@
 <div class="drawer" id="nav-drawer" hidden>
   <nav aria-label="Menu">
     <a href="#projet">Le projet</a>
+    <a href="#arbre">La marque</a>
     <a href="#preuve">La preuve</a>
     <a href="#simulateur">Simulateur</a>
     <a href="#plan">Le plan</a>
@@ -250,19 +251,20 @@
     <p class="intro rv">On n'achète pas seulement quatre murs. On achète ce qu'il y a autour : un médecin à trois minutes à pied, un supermarché en bas, une école dans le quartier. Les trois arrivent en même temps que les logements.</p>
 
     <div class="pillars">
-      <article class="pillar rv" style="--d:0ms">
+      <article class="pillar rv" style="--d:0ms;--pc:var(--kola)">
         <div class="pillar__art" aria-hidden="true">
           <svg viewBox="0 0 200 140" fill="none">
-            <path class="dr" d="M20 120h160" stroke="var(--or)" stroke-width="2"/>
+            <path class="dr" d="M20 120h160" stroke="var(--pc,var(--or))" stroke-width="2"/>
             <g stroke="var(--sable)" stroke-width="1.6" opacity=".85">
               <rect x="34" y="46" width="46" height="74"/><rect x="88" y="28" width="52" height="92"/><rect x="148" y="62" width="32" height="58"/>
               <path d="M44 62h10M62 62h10M44 80h10M62 80h10M44 98h10M62 98h10"/>
               <path d="M98 44h12M120 44h12M98 64h12M120 64h12M98 84h12M120 84h12M98 104h12M120 104h12"/>
               <path d="M156 78h14M156 98h14"/>
             </g>
-            <path d="M100 20v-8M96 16h8" stroke="var(--or)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M84 22 A16 16 0 0 1 116 22" stroke="var(--pc,var(--or))" stroke-width="3" stroke-linecap="round"/>
           </svg>
         </div>
+        <p class="pillar__etage">Étage terre, le bâti</p>
         <h3>Les Résidences</h3>
         <p class="pillar__n"><b>320</b> logements</p>
         <p>Du deux pièces au cinq pièces, entre 30 et 80 millions FCFA. Cuisine équipée, groupe électrogène commun, forage et château d'eau, gardiennage jour et nuit.</p>
@@ -273,20 +275,21 @@
         </ul>
       </article>
 
-      <article class="pillar rv" style="--d:100ms">
+      <article class="pillar rv" style="--d:100ms;--pc:var(--creme)">
         <div class="pillar__art" aria-hidden="true">
           <svg viewBox="0 0 200 140" fill="none">
-            <path class="dr" d="M20 120h160" stroke="var(--or)" stroke-width="2"/>
+            <path class="dr" d="M20 120h160" stroke="var(--pc,var(--or))" stroke-width="2"/>
             <g stroke="var(--sable)" stroke-width="1.6" opacity=".85">
               <rect x="46" y="40" width="108" height="80"/>
               <path d="M46 62h108"/>
               <rect x="88" y="88" width="24" height="32"/>
-              <path d="M66 78h16M74 70v16" stroke="var(--kola)" stroke-width="2.4"/>
+              <path d="M66 78h16M74 70v16" stroke="var(--pc,var(--kola))" stroke-width="3"/>
               <path d="M118 76h20M118 88h20M118 100h12"/>
             </g>
-            <path d="M100 28v-8M96 24h8" stroke="var(--or)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M84 30 A16 16 0 0 1 116 30" stroke="var(--pc,var(--or))" stroke-width="3" stroke-linecap="round"/>
           </svg>
         </div>
+        <p class="pillar__etage">Étage crème, le soin</p>
         <h3>La Clinique</h3>
         <p class="pillar__n"><b>24h</b> sur 24</p>
         <p>Urgences ouvertes en permanence, maternité, soins intensifs, laboratoire d'analyses et pharmacie. Ce que l'on cherche à trois heures du matin, à trois minutes de chez soi.</p>
@@ -297,19 +300,20 @@
         </ul>
       </article>
 
-      <article class="pillar rv" style="--d:200ms">
+      <article class="pillar rv" style="--d:200ms;--pc:var(--or)">
         <div class="pillar__art" aria-hidden="true">
           <svg viewBox="0 0 200 140" fill="none">
-            <path class="dr" d="M20 120h160" stroke="var(--or)" stroke-width="2"/>
+            <path class="dr" d="M20 120h160" stroke="var(--pc,var(--or))" stroke-width="2"/>
             <g stroke="var(--sable)" stroke-width="1.6" opacity=".85">
               <path d="M40 56h120l12 20H28Z"/>
               <rect x="40" y="76" width="120" height="44"/>
               <path d="M62 76v44M100 76v44M138 76v44"/>
               <path d="M46 92h10M84 92h10M122 92h10"/>
             </g>
-            <path d="M100 44v-8M96 40h8" stroke="var(--or)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M84 46 A16 16 0 0 1 116 46" stroke="var(--pc,var(--or))" stroke-width="3" stroke-linecap="round"/>
           </svg>
         </div>
+        <p class="pillar__etage">Étage or, l'échange</p>
         <h3>La Galerie</h3>
         <p class="pillar__n"><b>40</b> commerces</p>
         <p>Un supermarché, des boutiques, de la restauration, une agence bancaire et un point Mobile Money. Le loyer des commerces finance l'entretien des parties communes.</p>
@@ -319,6 +323,61 @@
           <li>Crèche et école primaire</li>
         </ul>
       </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ L'ARBRE ============ -->
+<section class="sec sec--tree" id="arbre" aria-labelledby="t-arbre">
+  <div class="wrap">
+    <p class="eyebrow rv">D'où vient la marque</p>
+    <h2 class="rv" id="t-arbre">Le fromager de Gagnoa.</h2>
+    <p class="intro rv">Le géant des forêts de l'ouest ivoirien, celui de la ville où nous avons grandi. On ne le plante pas, il s'impose. Nous avons rangé la maison dans cet arbre, étage par étage. Passez sur chaque ligne pour voir la partie dont elle parle.</p>
+
+    <div class="tree rv">
+      <div class="tree__art" id="treeArt">
+        <svg class="mark mark--tree" viewBox="0 0 120 124" fill="none" role="img" aria-label="Le logo IKK Group expliqué : contreforts, tronc, trois étages de canopée et fondation dorée">
+          <rect class="lg-bar" x="8" y="112" width="104" height="9" rx="4.5" fill="var(--lg-or,#E4A82F)"/>
+          <path class="lg-trunk" fill="var(--lg-creme,#F4EFE4)" d="M53.5 41 C53.5 66 51 86 42 100 C39 104.5 36 106.5 33 107.5 L33 112 L46 112 L50.5 104.5 Q52 102 53.5 104.5 L55 112 L65 112 L66.5 104.5 Q68 102 69.5 104.5 L74 112 L87 112 L87 107.5 C84 106.5 81 104.5 78 100 C69 86 66.5 66 66.5 41 Z"/>
+          <path class="lg-roots" fill="var(--or)" d="M33 112 L33 107.5 C36 106.5 39 104.5 42 100 C44.5 96.8 46.6 92.8 48.3 88 L71.7 88 C73.4 92.8 75.5 96.8 78 100 C81 104.5 84 106.5 87 107.5 L87 112 L74 112 L69.5 104.5 Q68 102 66.5 104.5 L65 112 L55 112 L53.5 104.5 Q52 102 50.5 104.5 L46 112 Z"/>
+          <path class="lg-arc lg-arc--3" d="M32.9 59 A27.1 27.1 0 0 1 87.1 59" stroke="var(--lg-terre,#C1663F)" stroke-width="9" stroke-linecap="round"/>
+          <path class="lg-arc lg-arc--2" d="M20.7 55 A39.4 39.4 0 0 1 99.3 55" stroke="var(--lg-or,#E4A82F)" stroke-width="10" stroke-linecap="round"/>
+          <path class="lg-arc lg-arc--1" d="M8 51 A52.3 52.3 0 0 1 112 51" stroke="var(--lg-creme,#F4EFE4)" stroke-width="11.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <ol class="tkeys" id="tkeys">
+        <li class="tkey" data-part="roots" tabindex="0" style="--c:var(--sable-doux)">
+          <span class="tkey__dot"></span>
+          <b>Les contreforts</b>
+          <span>Les racines aériennes du fromager, larges comme des murs. Elles disent d'où nous venons et pourquoi nous ne partirons pas.</span>
+        </li>
+        <li class="tkey" data-part="trunk" tabindex="0" style="--c:var(--creme)">
+          <span class="tkey__dot"></span>
+          <b>Le tronc unique</b>
+          <span>Une seule maison mère. Trois métiers, une seule signature, une seule responsabilité.</span>
+        </li>
+        <li class="tkey" data-part="a3" tabindex="0" style="--c:var(--kola)">
+          <span class="tkey__dot"></span>
+          <b>Étage terre, l'immobilier</b>
+          <span>Le bâti. Les logements, les bureaux, les quartiers. C'est par là que tout a commencé.</span>
+        </li>
+        <li class="tkey" data-part="a1" tabindex="0" style="--c:var(--creme)">
+          <span class="tkey__dot"></span>
+          <b>Étage crème, la santé</b>
+          <span>Le soin. Une clinique dans le quartier, pas à l'autre bout de la ville.</span>
+        </li>
+        <li class="tkey" data-part="a2" tabindex="0" style="--c:var(--or)">
+          <span class="tkey__dot"></span>
+          <b>Étage or, la grande distribution</b>
+          <span>L'échange. Le supermarché, les commerces, le marché du week-end.</span>
+        </li>
+        <li class="tkey" data-part="bar" tabindex="0" style="--c:var(--or)">
+          <span class="tkey__dot"></span>
+          <b>La fondation dorée</b>
+          <span>Le capital. Rien ne pousse sans elle, et elle porte les trois étages en même temps.</span>
+        </li>
+      </ol>
     </div>
   </div>
 </section>

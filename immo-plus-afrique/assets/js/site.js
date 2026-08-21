@@ -507,7 +507,30 @@
   }
 
   /* ==========================================================
-     10. L'ouverture de la marque
+     10. L'arbre : chaque ligne allume sa partie du logo
+     ========================================================== */
+  const treeArt = $('#treeArt');
+  const tkeys = $$('.tkey');
+  if (treeArt && tkeys.length) {
+    const allumer = (k) => {
+      treeArt.dataset.on = k.dataset.part;
+      tkeys.forEach(o => o.classList.toggle('is-on', o === k));
+    };
+    const eteindre = () => {
+      delete treeArt.dataset.on;
+      tkeys.forEach(o => o.classList.remove('is-on'));
+    };
+    tkeys.forEach(k => {
+      k.addEventListener('pointerenter', () => allumer(k));
+      k.addEventListener('focus', () => allumer(k));
+      k.addEventListener('click', () => allumer(k));
+      k.addEventListener('blur', eteindre);
+    });
+    $('#tkeys').addEventListener('pointerleave', eteindre);
+  }
+
+  /* ==========================================================
+     11. L'ouverture de la marque
      ========================================================== */
   // L'animation est entièrement en CSS et se termine toute seule, même si
   // ce script tombe. Ici on ne fait que deux choses : la couper si le
@@ -540,7 +563,7 @@
   }
 
   /* ==========================================================
-     11. Démarrage
+     12. Démarrage
      ========================================================== */
   measure();
   readProgress();

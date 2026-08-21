@@ -667,3 +667,60 @@ html:not(.js) .band{position:static;opacity:1!important;transform:none!important
 html:not(.js) .band span{font-size:clamp(1.3rem,4vw,1.7rem);max-width:24ch}
 html:not(.js) .hero__settle{opacity:1;transform:none;pointer-events:auto}
 html:not(.js) .hero__hint,html:not(.js) .dust{display:none}
+
+/* ==========================================================
+   Le fromager de Gagnoa : le logo expliqué
+   ========================================================== */
+.sec--tree{position:relative}
+.pillar__etage{font-family:var(--ff-mono);font-size:.66rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--pc,var(--or));margin:0 0 .5rem;opacity:.9}
+.pillar__n{color:var(--pc,var(--or))}
+.pillar__n b{color:var(--pc,var(--or))}
+.pillar:hover{border-color:color-mix(in oklab,var(--pc,var(--or)) 40%,transparent)}
+.pillar::after{background:radial-gradient(360px 200px at var(--mx,50%) var(--my,0%),
+  color-mix(in oklab,var(--pc,var(--or)) 16%,transparent),transparent 70%)}
+.ticks li::before{background:
+  linear-gradient(var(--pc,var(--or)),var(--pc,var(--or))) center/9px 1.4px no-repeat,
+  linear-gradient(var(--pc,var(--or)),var(--pc,var(--or))) center/1.4px 9px no-repeat}
+
+.tree{display:grid;gap:clamp(1.6rem,4vw,3.4rem);grid-template-columns:minmax(220px,340px) 1fr;
+  align-items:stretch;margin-top:3.2rem}
+.tree__art{display:grid;place-items:center;padding:clamp(1.4rem,3vw,2.4rem);
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  background:radial-gradient(120% 100% at 50% 22%,rgba(20,41,58,.85),rgba(20,16,9,.55) 70%)}
+.mark--tree{width:100%;max-width:250px}
+.mark--tree .lg-arc,.mark--tree .lg-trunk,.mark--tree .lg-bar,.mark--tree .lg-roots{
+  transition:opacity .45s var(--ease)}
+.lg-roots{opacity:0}
+
+/* rien de sélectionné : tout est allumé */
+.tree__art[data-on] .lg-arc,
+.tree__art[data-on] .lg-trunk,
+.tree__art[data-on] .lg-bar{opacity:.16}
+.tree__art[data-on="a1"] .lg-arc--1,
+.tree__art[data-on="a2"] .lg-arc--2,
+.tree__art[data-on="a3"] .lg-arc--3,
+.tree__art[data-on="trunk"] .lg-trunk,
+.tree__art[data-on="bar"] .lg-bar{opacity:1}
+.tree__art[data-on="roots"] .lg-trunk{opacity:.5}
+.tree__art[data-on="roots"] .lg-roots{opacity:.85}
+
+.tkeys{list-style:none;margin:0;padding:0;display:grid;gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.tkey{position:relative;display:grid;grid-template-columns:auto 1fr;gap:.2rem .9rem;
+  align-items:baseline;padding:1rem 1.2rem;cursor:pointer;
+  background:linear-gradient(180deg,rgba(30,24,17,.86),rgba(20,16,9,.86));
+  transition:background .35s var(--ease)}
+.tkey:hover,.tkey.is-on{background:linear-gradient(180deg,rgba(51,40,25,.92),rgba(30,24,17,.92))}
+.tkey__dot{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none;
+  transform:translateY(-.15em);box-shadow:0 0 0 0 color-mix(in oklab,var(--c) 50%,transparent);
+  transition:box-shadow .4s var(--ease)}
+.tkey:hover .tkey__dot,.tkey.is-on .tkey__dot{box-shadow:0 0 0 5px color-mix(in oklab,var(--c) 22%,transparent)}
+.tkey b{font-family:var(--ff-display);font-weight:600;font-size:1.02rem;letter-spacing:-.01em;color:var(--sable)}
+.tkey>span:last-child{grid-column:2;font-size:.9rem;color:var(--sable-doux);line-height:1.55}
+.tkey:focus-visible{outline:2px solid var(--or-clair);outline-offset:-2px}
+
+@media (max-width:900px){
+  .tree{grid-template-columns:1fr}
+  .mark--tree{max-width:180px}
+}

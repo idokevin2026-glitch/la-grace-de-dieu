@@ -64,7 +64,27 @@ Fond terre profonde, jamais noir pur. Texte sable, jamais blanc pur. L'or en tr�
 - Texte : **Manrope**.
 - Étiquettes : **Space Mono**, majuscules, très espacé.
 
-**La marque** : IKK Group, redessinée en SVG à partir du logo fourni. Arbre à trois arcs
+**La marque** : IKK Group, redessinée en SVG à partir du logo fourni.
+
+**Ce que l'arbre raconte**, tel que le client l'a défini. Le logo n'est pas un motif
+décoratif, c'est l'organigramme du groupe :
+
+| Partie | Sens |
+|---|---|
+| Les contreforts | Les racines aériennes du fromager de Gagnoa, la ville d'origine. L'ancrage. |
+| Le tronc unique | La holding. Une seule maison mère pour les trois métiers. |
+| Arc terre cuite | Immobilier, le bâti. |
+| Arc crème | Santé, le soin. |
+| Arc or | Grande distribution, l'échange. |
+| La barre dorée | Le capital. La fondation qui porte les trois étages. |
+
+**La conséquence sur la page** : les trois piliers du programme présenté, Les Résidences,
+La Clinique et La Galerie, sont exactement les trois métiers du groupe, dans le même
+ordre. Chaque carte de pilier reprend donc la couleur de son étage de canopée : le trait
+de sol du dessin, l'arc au-dessus du bâtiment, l'étiquette d'étage, le chiffre clé, les
+puces et la lueur au survol. La section « Le fromager de Gagnoa » explique la lecture,
+avec un logo grand format dont chaque partie s'allume quand on survole sa ligne.
+ Arbre à trois arcs
 (crème, or, terre cuite) sur socle doré. Le bleu marine du logo entre dans la palette
 comme sol de la marque : il sert de fond à l'ouverture de page, et nulle part ailleurs,
 pour ne pas concurrencer l'heure dorée d'Abidjan.
@@ -108,6 +128,9 @@ Les bornes sont un point de départ, validées ensuite au test du scroll rapide.
 2. **Le problème, dans leurs mots** : les trois peurs, écrites sans détour.
 3. **Le projet** : trois piliers à traitement égal, résidences, clinique, galerie.
 4. **La preuve** : six garanties qui répondent une par une aux objections trouvées.
+4b. **Le fromager de Gagnoa** : le logo expliqué partie par partie, chaque ligne allume
+   la sienne. C'est là que le site dit d'où vient la maison et pourquoi les trois piliers
+   du programme sont ceux-là.
 5. **Le simulateur** : le moment interactif. Le visiteur choisit son logement et son apport,
    voit le prix, la mensualité et le rendement locatif, puis part sur WhatsApp avec le message déjà écrit.
 6. **Le plan de masse** : SVG tracé au scroll, points chauds.
