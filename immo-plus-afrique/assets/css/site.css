@@ -1,5 +1,5 @@
 /* ==========================================================
-   IMMO+ Afrique
+   IKK Group
    Direction : la chaleur d'Abidjan à l'heure dorée,
    tenue par une rigueur de maison de luxe.
    ========================================================== */
@@ -11,10 +11,13 @@
   --ecorce-2:#332819;
   --sable:#F0E4D2;
   --sable-doux:#B9A98F;
-  --or:#E3A63F;
+  --or:#E4A82F;
   --or-clair:#F6CF86;
   --lagune:#2C8078;
-  --kola:#C24B32;
+  --kola:#C1663F;
+  --marine:#14293A;
+  --marine-clair:#1D3A50;
+  --creme:#F4EFE4;
 
   --ff-display:"Fraunces",Georgia,"Times New Roman",serif;
   --ff-body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -136,12 +139,6 @@ a{color:inherit}
 }
 .nav.is-hidden{transform:translateY(-104%)}
 .nav{transition:transform .45s var(--ease-out),background .5s var(--ease),backdrop-filter .5s var(--ease),border-color .5s var(--ease),padding .5s var(--ease)}
-.nav__mark{display:flex;align-items:center;gap:.55rem;text-decoration:none;margin-right:auto}
-.nav__plus{width:26px;height:26px;display:grid;place-items:center;color:var(--or);flex:none}
-.nav__plus svg{width:100%;height:100%;transition:transform .6s var(--ease-out)}
-.nav__mark:hover .nav__plus svg{transform:rotate(90deg)}
-.nav__name{font-family:var(--ff-display);font-weight:700;font-size:1.02rem;letter-spacing:-.01em;white-space:nowrap}
-.nav__name em{font-style:normal;color:var(--or)}
 .nav__links{display:flex;gap:clamp(10px,1.6vw,26px)}
 .nav__links a{
   position:relative;text-decoration:none;font-size:.86rem;font-weight:500;
@@ -410,7 +407,8 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .figures{display:grid;gap:1px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));margin-top:3.2rem;background:var(--line);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
 .fig{background:linear-gradient(180deg,rgba(30,24,17,.88),rgba(20,16,9,.88));padding:1.8rem 1.4rem;transition:opacity .8s var(--ease-out) var(--d,0ms),transform .9s var(--ease-out) var(--d,0ms)}
 .fig b{display:block;font-family:var(--ff-display);font-weight:600;font-size:clamp(2rem,3.6vw,2.7rem);line-height:1;color:var(--or-clair);letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin-bottom:.6rem}
-.fig span{font-size:.9rem;color:var(--sable-doux);line-height:1.5;display:block;max-width:26ch}
+.fig>span{font-size:.9rem;color:var(--sable-doux);line-height:1.5;display:block;max-width:26ch}
+.fig b span{display:inline;font-size:inherit;color:inherit;line-height:inherit;max-width:none}
 .pull{margin:3rem 0 0;padding:2rem 0 0;border-top:1px solid var(--line);max-width:44ch}
 .pull p{font-family:var(--ff-display);font-size:clamp(1.3rem,2.4vw,1.85rem);line-height:1.3;letter-spacing:-.015em;margin:0 0 .8rem}
 .pull cite{font-style:normal;font-family:var(--ff-mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--or)}
@@ -565,3 +563,107 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   .rule::before,.rule::after{transform:scaleX(1)}
   .rule span{transform:none;opacity:.85}
 }
+
+/* ==========================================================
+   La marque IKK Group
+   ========================================================== */
+.mark{--lg-creme:var(--creme);--lg-or:var(--or);--lg-terre:var(--kola);
+  display:block;width:auto;height:auto;overflow:visible}
+.mark .lg-arc,.mark .lg-trunk,.mark .lg-bar{transform-box:view-box}
+
+.lgw{font-family:var(--ff-display);font-weight:700;color:var(--creme);
+  letter-spacing:-.012em;line-height:1;margin:0;display:flex;align-items:baseline;justify-content:center}
+.lgw em{font-style:normal;color:var(--or);font-size:.52em;letter-spacing:.15em;
+  margin-left:.1em;transform:translateY(-.02em)}
+.lgt{color:var(--sable-doux);margin:.55rem 0 0;letter-spacing:.005em;text-align:center}
+
+/* ---------- l'en-tête ---------- */
+.nav__mark{display:flex;align-items:center;gap:.6rem;text-decoration:none;margin-right:auto}
+.mark--nav{width:34px;flex:none}
+.nav__name{font-family:var(--ff-display);font-weight:700;font-size:1.04rem;
+  letter-spacing:-.012em;white-space:nowrap;display:flex;align-items:baseline;color:var(--creme)}
+.nav__name em{font-style:normal;color:var(--or);font-size:.55em;letter-spacing:.14em;margin-left:.14em}
+.mark--nav .lg-arc{transition:transform .5s var(--ease-out),opacity .4s var(--ease)}
+.nav__mark:hover .mark--nav .lg-arc--1{transform:translateY(-3px)}
+.nav__mark:hover .mark--nav .lg-arc--2{transform:translateY(-1.8px);transition-delay:.05s}
+.nav__mark:hover .mark--nav .lg-arc--3{transform:translateY(-.8px);transition-delay:.1s}
+.mark--nav .lg-bar{transition:transform .5s var(--ease-out);transform-origin:60px 116px}
+.nav__mark:hover .mark--nav .lg-bar{transform:scaleX(1.06)}
+
+/* ---------- le pied de page ---------- */
+.mark--foot{width:58px;margin-bottom:.9rem}
+.foot__brand .lgw--foot{font-size:2rem;justify-content:flex-start;max-width:none;margin:0}
+.foot__brand .lgt--foot{font-size:.88rem;text-align:left;margin:.45rem 0 0;max-width:none;color:var(--sable-doux)}
+.foot__brand p:last-child{margin-top:1rem}
+.foot__brand .mark .lg-arc{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1s var(--ease-out)}
+.foot__brand .mark .lg-arc--3{transition-delay:.1s}
+.foot__brand .mark .lg-arc--2{transition-delay:.25s}
+.foot__brand .mark .lg-arc--1{transition-delay:.4s}
+.foot.is-in .mark .lg-arc{stroke-dashoffset:0}
+
+/* ---------- le filigrane ---------- */
+.ghost{position:absolute;inset:0;overflow:hidden;pointer-events:none;display:grid;
+  place-items:center end;padding-right:2vw}
+.mark--ghost{width:min(420px,38vw);opacity:.035;transform:translateY(10%)}
+
+/* ==========================================================
+   L'ouverture : l'arbre se construit, puis le rideau se lève
+   ========================================================== */
+.ouv{display:none}
+.js:not(.vu) .ouv{
+  display:grid;position:fixed;inset:0;z-index:100;place-items:center;
+  background:var(--marine);
+  animation:introOut .8s var(--ease-out) 1.6s forwards;
+}
+@keyframes introOut{
+  0%{transform:translateY(0);opacity:1}
+  100%{transform:translateY(-101%);opacity:1;visibility:hidden;pointer-events:none}
+}
+.ouv__halo{position:absolute;width:min(760px,90vw);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle,rgba(228,168,47,.22),transparent 64%);
+  opacity:0;animation:haloIn 1.4s var(--ease-out) .5s forwards}
+@keyframes haloIn{to{opacity:1}}
+.ouv__in{position:relative;display:grid;justify-items:center;padding:2rem}
+.mark--intro{width:min(190px,36vw)}
+
+.ouv .lg-bar{transform-origin:60px 116px;transform:scaleX(0);
+  animation:lgBar .6s var(--ease-out) .06s forwards}
+@keyframes lgBar{to{transform:scaleX(1)}}
+.ouv .lg-trunk{transform-origin:60px 112px;transform:scaleY(0);
+  animation:lgTrunk .62s var(--ease-out) .24s forwards}
+@keyframes lgTrunk{to{transform:scaleY(1)}}
+.ouv .lg-arc{stroke-dasharray:1;stroke-dashoffset:1;animation:lgArc .62s var(--ease-out) forwards}
+@keyframes lgArc{to{stroke-dashoffset:0}}
+.ouv .lg-arc--3{animation-delay:.46s}
+.ouv .lg-arc--2{animation-delay:.60s}
+.ouv .lg-arc--1{animation-delay:.74s}
+
+.ouv .lgw{font-size:clamp(2.2rem,8vw,3.6rem);margin-top:1.5rem}
+.ouv .lgt{font-size:clamp(.82rem,2.4vw,.98rem)}
+.ouv .lgw span,.ouv .lgw em,.ouv .lgt{opacity:0;transform:translateY(16px);
+  animation:lgRise .72s var(--ease-out) forwards}
+@keyframes lgRise{to{opacity:1;transform:none}}
+.ouv .lgw span{animation-delay:.96s}
+.ouv .lgw em{animation-delay:1.06s}
+.ouv .lgt{animation-delay:1.18s;opacity:0}
+.ouv .lgt{color:#9FB0BC}
+
+@media (prefers-reduced-motion:reduce){
+  .js:not(.vu) .ouv{display:none}
+}
+
+/* ==========================================================
+   Sans JavaScript : rien ne doit rester invisible
+   ========================================================== */
+html:not(.js) .rv{opacity:1!important;transform:none!important}
+html:not(.js) .dr{stroke-dashoffset:0!important}
+html:not(.js) .rule::before,html:not(.js) .rule::after{transform:scaleX(1)!important}
+html:not(.js) .rule span{opacity:.85!important;transform:none!important}
+html:not(.js) .lg-arc{stroke-dashoffset:0!important}
+html:not(.js) .hero{height:auto}
+html:not(.js) .hero__stage{position:relative;height:auto;min-height:100svh;padding-top:22vh}
+html:not(.js) .hero__bands{padding:0 var(--pad) 1.6rem;max-width:min(880px,92vw)}
+html:not(.js) .band{position:static;opacity:1!important;transform:none!important;margin:0 0 .9rem}
+html:not(.js) .band span{font-size:clamp(1.3rem,4vw,1.7rem);max-width:24ch}
+html:not(.js) .hero__settle{opacity:1;transform:none;pointer-events:auto}
+html:not(.js) .hero__hint,html:not(.js) .dust{display:none}

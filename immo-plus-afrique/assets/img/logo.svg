@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 128 132" fill="none">
+  <title>IKK Group</title>
+  <rect x="8" y="112" width="104" height="9" rx="4.5" fill="#E4A82F"/>
+  <path fill="#F4EFE4" d="M53.5 41 C53.5 66 51 86 42 100 C39 104.5 36 106.5 33 107.5 L33 112 L46 112 L50.5 104.5 Q52 102 53.5 104.5 L55 112 L65 112 L66.5 104.5 Q68 102 69.5 104.5 L74 112 L87 112 L87 107.5 C84 106.5 81 104.5 78 100 C69 86 66.5 66 66.5 41 Z"/>
+  <path d="M32.9 59 A27.1 27.1 0 0 1 87.1 59" stroke="#C1663F" stroke-width="9" stroke-linecap="round"/>
+  <path d="M20.7 55 A39.4 39.4 0 0 1 99.3 55" stroke="#E4A82F" stroke-width="10" stroke-linecap="round"/>
+  <path d="M8 51 A52.3 52.3 0 0 1 112 51" stroke="#F4EFE4" stroke-width="11.8" stroke-linecap="round"/>
+</svg>

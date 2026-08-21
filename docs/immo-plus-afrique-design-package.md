@@ -1,4 +1,4 @@
-# Dossier de conception, IMMO+ Afrique
+# Dossier de conception, IKK Group
 
 Document de travail. Il n'est pas publié avec le site. Le site vit dans `immo-plus-afrique/`.
 
@@ -64,10 +64,24 @@ Fond terre profonde, jamais noir pur. Texte sable, jamais blanc pur. L'or en tr�
 - Texte : **Manrope**.
 - Étiquettes : **Space Mono**, majuscules, très espacé.
 
+**La marque** : IKK Group, redessinée en SVG à partir du logo fourni. Arbre à trois arcs
+(crème, or, terre cuite) sur socle doré. Le bleu marine du logo entre dans la palette
+comme sol de la marque : il sert de fond à l'ouverture de page, et nulle part ailleurs,
+pour ne pas concurrencer l'heure dorée d'Abidjan.
+
+| Jeton ajouté | Valeur | Rôle |
+|---|---|---|
+| `--marine` | `#14293A` | le bleu du logo, fond de l'ouverture |
+| `--creme` | `#F4EFE4` | le crème du logo, tronc et mot IKK |
+
+Le doré du site a été aligné sur celui du logo (`#E4A82F`) et la terre cuite aussi
+(`#C1663F`), pour que la page et la marque parlent d'une seule voix.
+
 **Élément signature** : le trait d'horizon. Une ligne SVG unique qui se dessine au scroll et devient
 tour à tour la ligne de la lagune, la silhouette du Plateau, le plan de masse du projet.
 
-**Motif** : le « + » du nom, repris en croix de visée sur les cartes, les puces et les repères de plan.
+**Motif** : les trois arcs du logo, repris au centre des traits de séparation. La croix
+de visée reste sur les puces et les repères de plan, où elle sert de marqueur.
 
 **Couche vectorielle dessinée à la main**
 1. Silhouette du Plateau et de la lagune, trois plans de parallaxe.

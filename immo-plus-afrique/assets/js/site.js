@@ -1,5 +1,5 @@
 /* ==========================================================
-   IMMO+ Afrique
+   IKK Group, Abidjan
    Aucune bibliothèque. Une seule boucle d'animation, qui se met
    au repos dès qu'il n'y a plus rien à bouger.
    ========================================================== */
@@ -396,7 +396,7 @@
     outs.rdt.textContent = (RENDEMENT * 100).toFixed(1).replace('.', ',') + ' %';
 
     simuWa.href = waLink(
-      'Bonjour IMMO+ Afrique. J\'ai fait le calcul sur votre site.\n' +
+      'Bonjour IKK Group. J\'ai fait le calcul sur votre site.\n' +
       '• Logement : ' + label + '\n' +
       '• Prix : ' + fmt(prix) + ' FCFA\n' +
       '• Apport : ' + Math.round(ap * 100) + ' % soit ' + fmt(apportF) + ' FCFA\n' +
@@ -497,7 +497,7 @@
       err.hidden = true;
       const besoin = $('#fBesoin').value;
       const mot = $('#fMot').value.trim();
-      const msg = 'Bonjour IMMO+ Afrique.\n' +
+      const msg = 'Bonjour IKK Group.\n' +
         'Je m\'appelle ' + nom + '.\n' +
         'Je cherche : ' + besoin + '.' +
         (mot ? '\n' + mot : '');
@@ -507,7 +507,40 @@
   }
 
   /* ==========================================================
-     10. Démarrage
+     10. L'ouverture de la marque
+     ========================================================== */
+  // L'animation est entièrement en CSS et se termine toute seule, même si
+  // ce script tombe. Ici on ne fait que deux choses : la couper si le
+  // visiteur touche quelque chose, et ne pas la rejouer à chaque page.
+  const ouv = $('#ouv');
+  if (ouv && html.classList.contains('js') && !html.classList.contains('vu')) {
+    const couper = () => {
+      ouv.style.animation = 'introOut .5s var(--ease-out) forwards';
+      retirer();
+    };
+    const retirer = () => {
+      ['pointerdown', 'wheel', 'touchstart', 'keydown'].forEach(
+        e => removeEventListener(e, couper));
+    };
+    ['pointerdown', 'wheel', 'touchstart', 'keydown'].forEach(
+      e => addEventListener(e, couper, { once: true, passive: true }));
+    setTimeout(retirer, 3000);
+  }
+
+  /* ---------- la signature du pied de page ---------- */
+  const foot = $('.foot');
+  if (foot && 'IntersectionObserver' in window && !reduce.matches) {
+    new IntersectionObserver((es, o) => {
+      if (!es[0].isIntersecting) return;
+      foot.classList.add('is-in');
+      o.disconnect();
+    }, { threshold: 0.12 }).observe(foot);
+  } else if (foot) {
+    foot.classList.add('is-in');
+  }
+
+  /* ==========================================================
+     11. Démarrage
      ========================================================== */
   measure();
   readProgress();
