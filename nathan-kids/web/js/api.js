@@ -41,7 +41,7 @@ const NK = (() => {
   // version change. Répare les sessions déjà ouvertes dont le curseur périmé
   // masquait des données (ex. vendeuse avec un stock affiché à 0) — sans
   // déconnexion : le prochain `sync_since` repart de zéro et récupère tout.
-  const SYNC_V = "2";
+  const SYNC_V = "3";
   try {
     if (localStorage.getItem("nk.syncv") !== SYNC_V) {
       localStorage.removeItem(LS.since);
@@ -333,21 +333,35 @@ const NK = (() => {
     // dernière vente. Aucun montant/marge exposé.
     saleTimes: (limit = 1000) =>
       get(`stock_movements?select=product_id,created_at&reason=eq.sale&order=created_at.desc&limit=${limit}`),
-    // Sync incrémental : met à jour le cache local et le curseur.
+    // Sync incrémental : FUSIONNE le delta dans le cache local (voir mergeById).
     async sync() {
       const since = localStorage.getItem(LS.since) || "1970-01-01T00:00:00Z";
       const data = await rpc("sync_since", { p_since: since });
       const c = cache.read();
-      if (data.products) c.products = data.products;
-      if (data.accounts) c.accounts = data.accounts;
-      // Repli hors ligne pour les écrans Pointage / Mouvements (données du delta).
-      if (data.attendance) c.attendance = data.attendance;
-      if (data.stockMovements) c.stockMovements = data.stockMovements;
+      // sync_since renvoie des DELTAS (lignes modifiées depuis `since`). On les
+      // FUSIONNE par id — jamais de remplacement, sinon la liste rétrécirait au
+      // seul delta (bug : le stock « disparaît » après un ajout / au bout de 60 s).
+      if (Array.isArray(data.products)) {
+        c.products = mergeById(c.products, data.products)
+          .filter((p) => !p.archived)
+          .sort((a, b) => String(a.name_fr || "").localeCompare(String(b.name_fr || "")));
+      }
+      if (data.accounts) c.accounts = data.accounts; // snapshot complet (objet) : remplacement OK
+      if (Array.isArray(data.attendance)) c.attendance = mergeById(c.attendance, data.attendance);
+      if (Array.isArray(data.stockMovements)) c.stockMovements = mergeById(c.stockMovements, data.stockMovements);
       cache.write(c);
       if (data.now) localStorage.setItem(LS.since, data.now);
-      return data;
+      // Renvoie la liste COMPLÈTE fusionnée (pas le delta) à l'appelant.
+      return { ...data, products: c.products, accounts: c.accounts };
     },
   };
+
+  // Fusionne un delta (lignes changées) dans une liste existante, par id (upsert).
+  function mergeById(existing, delta) {
+    const map = new Map((existing || []).map((x) => [String(x.id), x]));
+    for (const item of delta || []) map.set(String(item.id), item);
+    return [...map.values()];
+  }
 
   // Indicateurs dérivés (BUSINESS_LOGIC.md §8) — calculés sur le cache produits.
   function indicators(products) {
