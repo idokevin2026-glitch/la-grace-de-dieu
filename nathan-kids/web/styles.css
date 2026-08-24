@@ -333,9 +333,18 @@ h3 { margin: 20px 0 10px; font-size: 13px; color: var(--muted); text-transform: 
 .money-actions { display: flex; gap: 8px; margin: 12px 0 4px; }
 .money-actions button { flex: 1; font-weight: 600; }
 
-/* ---------- Code couleur par catégorie : bleu=vêtements, rose=cosmétiques ---------- */
-.row.cat-vet, .prod.cat-vet { border-left: 4px solid var(--blue); }
-.row.cat-cos, .prod.cat-cos { border-left: 4px solid var(--pink); }
+/* ---------- Code couleur par catégorie ---------- */
+.row.cat-vet, .prod.cat-vet { border-left: 4px solid var(--blue); }   /* vêtements */
+.row.cat-cos, .prod.cat-cos { border-left: 4px solid var(--pink); }   /* cosmétiques */
+.row.cat-cha, .prod.cat-cha { border-left: 4px solid var(--gold); }   /* chaussures */
+.row.cat-sac, .prod.cat-sac { border-left: 4px solid var(--teal); }   /* sacs */
+
+/* ---------- Onglets de filtre par catégorie (Stock) ---------- */
+.cat-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px; scrollbar-width: none; }
+.cat-tabs::-webkit-scrollbar { display: none; }
+.cat-chip { flex: none; padding: 8px 15px; border: 1px solid var(--line); border-radius: 20px; background: var(--card); font-size: 13px; font-weight: 600; color: var(--muted); }
+.cat-chip.on { background: var(--green); color: #fff; border-color: var(--green); }
+.cat-chip:active { transform: scale(.96); }
 
 /* Champ code-barres + bouton scan dans le formulaire produit */
 .scan-field { display: flex; gap: 8px; }
@@ -399,7 +408,7 @@ button.big { font-size: 17px; }
   .dead-summary .ds-k { color: #c9a75f; }
   .logout-btn { background: #331a1a; }
   .qty button, .methods .m, .row-act button, .money-actions button, #staff-list [data-del], #staff-list [data-pin],
-  .scan-btn, .stock-actions button, .count, .form input, .form select, .scan-mini { background: var(--soft); }
+  .scan-btn, .stock-actions button, .count, .form input, .form select, .scan-mini, .cat-chip { background: var(--soft); }
   .alert { background: #2a2313; border-color: #46381c; }
   .alert-txt b, .alert-go { color: #e8c583; }
   .alert-txt small { color: #c9a75f; }

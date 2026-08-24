@@ -108,9 +108,23 @@
     localStorage.setItem("nk.lang", l);
   };
   const pn = (p) => (lang === "en" ? p.name_en || p.name_fr : p.name_fr || p.name_en);
-  // Code couleur par catégorie : bleu = vêtements, rose = cosmétiques.
-  const catClass = (p) =>
-    p && p.category === "cosmetiques" ? "cat-cos" : p && p.category === "vetements" ? "cat-vet" : "cat-other";
+  // Catégories (source unique) : id en base, libellé FR/EN, classe couleur.
+  const CATEGORIES = [
+    { id: "vetements", fr: "Vêtements", en: "Clothing", cls: "cat-vet" },
+    { id: "cosmetiques", fr: "Cosmétiques", en: "Cosmetics", cls: "cat-cos" },
+    { id: "chaussures", fr: "Chaussures", en: "Shoes", cls: "cat-cha" },
+    { id: "sacs", fr: "Sacs", en: "Bags", cls: "cat-sac" },
+  ];
+  const catOf = (id) => CATEGORIES.find((c) => c.id === id);
+  const catLabel = (id) => {
+    const c = catOf(id);
+    return c ? (lang === "en" ? c.en : c.fr) : id || "";
+  };
+  // Code couleur par catégorie (bordure gauche colorée).
+  const catClass = (p) => {
+    const c = p && catOf(p.category);
+    return c ? c.cls : "cat-other";
+  };
   // Lien de connexion à partager aux vendeuses (pré-remplit la boutique).
   const shareLink = () => {
     const id = (NK.getShop() || {}).id || "";
@@ -154,6 +168,7 @@
     daily: null, // fiche du jour agrégée
     week: null, // agrégat 7 jours { days, sum, bestIdx, todayTotal, yestTotal }
     deadDays: 60, // seuil « stock mort » (jours sans vente)
+    stockCat: "all", // filtre catégorie de l'écran Stock
   };
 
   // ---- Toast ----------------------------------------------------------------
@@ -829,8 +844,32 @@
   // ========================================================================
   //  STOCK
   // ========================================================================
+  // Filtre combiné (catégorie + recherche) appliqué aux lignes du stock.
+  function applyStockFilter() {
+    const qEl = $("#q");
+    const q = (qEl ? qEl.value : "").toLowerCase();
+    const cat = state.stockCat || "all";
+    const list = $("#stock-list");
+    if (!list) return;
+    list.querySelectorAll(".row").forEach((el) => {
+      const p = state.products.find((x) => String(x.id) === el.dataset.p);
+      const okCat = cat === "all" || (p && p.category === cat);
+      const okQ = p && pn(p).toLowerCase().includes(q);
+      el.style.display = okCat && okQ ? "" : "none";
+    });
+  }
+
   function screenStock() {
     const admin = NK.isAdmin();
+    // Catégories présentes dans le stock → onglets de filtre (+ « Tous »).
+    const present = CATEGORIES.filter((c) => state.products.some((p) => p.category === c.id));
+    if (state.stockCat && state.stockCat !== "all" && !present.some((c) => c.id === state.stockCat)) {
+      state.stockCat = "all";
+    }
+    const cur = state.stockCat || "all";
+    const chips = [{ id: "all", label: lang === "en" ? "All" : "Tous" }, ...present.map((c) => ({ id: c.id, label: lang === "en" ? c.en : c.fr }))]
+      .map((c) => `<button class="cat-chip ${cur === c.id ? "on" : ""}" data-cat="${c.id}">${esc(c.label)}</button>`)
+      .join("");
     paint(
       tabHeader(t("stock")),
       `
@@ -839,6 +878,7 @@
         ${admin ? `<button id="add-prod-btn">＋ ${t("product")}</button>` : ""}
       </div>
       <input id="q" class="search" placeholder="${t("search")}"/>
+      ${present.length > 1 ? `<div class="cat-tabs">${chips}</div>` : ""}
       <div class="list" id="stock-list">
         ${state.products
           .map(
@@ -846,7 +886,7 @@
           <div class="row ${catClass(p)}" data-p="${p.id}">
             <div class="row-main">
               <strong>${esc(pn(p))}</strong>
-              <small>${esc(p.category)}${admin && p.cost != null ? ` · ${lang === "en" ? "cost" : "coût"} ${fmt(p.cost)}` : ""} · ${fmt(p.price)}</small>
+              <small>${esc(catLabel(p.category))}${admin && p.cost != null ? ` · ${lang === "en" ? "cost" : "coût"} ${fmt(p.cost)}` : ""} · ${fmt(p.price)}</small>
             </div>
             <span class="pill ${p.stock === 0 ? "z" : p.stock <= p.threshold ? "low" : "ok"}">${p.stock}</span>
             <div class="row-act">
@@ -859,15 +899,17 @@
           .join("")}
       </div>`,
     );
-    $("#q").oninput = (e) => {
-      const q = e.target.value.toLowerCase();
-      $("#stock-list")
-        .querySelectorAll(".row")
-        .forEach((el) => {
-          const p = state.products.find((x) => String(x.id) === el.dataset.p);
-          el.style.display = p && pn(p).toLowerCase().includes(q) ? "" : "none";
-        });
-    };
+    applyStockFilter();
+    const tabs = $(".cat-tabs");
+    if (tabs)
+      tabs.onclick = (e) => {
+        const b = e.target.closest("[data-cat]");
+        if (!b) return;
+        state.stockCat = b.dataset.cat;
+        tabs.querySelectorAll(".cat-chip").forEach((c) => c.classList.toggle("on", c.dataset.cat === b.dataset.cat));
+        applyStockFilter();
+      };
+    $("#q").oninput = applyStockFilter;
     $("#stock-list").onclick = async (e) => {
       const rs = e.target.closest("[data-restock]");
       const aj = e.target.closest("[data-adjust]");
@@ -944,8 +986,7 @@
         <input id="f-fr" placeholder="${L("Name (French)", "Nom (français)")}" value="${esc(p.name_fr || "")}"/>
         <input id="f-en" placeholder="${L("Name (English)", "Nom (anglais)")}" value="${esc(p.name_en || "")}"/>
         <select id="f-cat">
-          <option value="vetements" ${p.category === "vetements" ? "selected" : ""}>${L("Clothing", "Vêtements")}</option>
-          <option value="cosmetiques" ${p.category === "cosmetiques" ? "selected" : ""}>${L("Cosmetics", "Cosmétiques")}</option>
+          ${CATEGORIES.map((c) => `<option value="${c.id}" ${p.category === c.id ? "selected" : ""}>${L(c.en, c.fr)}</option>`).join("")}
         </select>
         <div class="two"><input id="f-price" type="number" inputmode="numeric" placeholder="${L("Sale price", "Prix de vente")}" value="${p.price ?? ""}"/><input id="f-cost" type="number" inputmode="numeric" placeholder="${L("Cost", "Coût d'achat")}" value="${p.cost ?? ""}"/></div>
         ${
