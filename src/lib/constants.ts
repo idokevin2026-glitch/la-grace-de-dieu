@@ -40,6 +40,12 @@ export function nextTier(points: number): Tier | null {
   return TIERS.find((t) => t.min > points) ?? null;
 }
 
+/** Remise permanente liée au niveau de fidélité, en FCFA entiers (Ivoire -5 %, Or -10 %). */
+export function memberDiscountValue(subtotal: number, tier: Tier | null): number {
+  if (!tier || !tier.discount) return 0;
+  return Math.round(subtotal * tier.discount);
+}
+
 /* --- livraison ---------------------------------------------------- */
 export const COMMUNES = [
   "Gagnoa Centre",

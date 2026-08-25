@@ -8,7 +8,7 @@ import { SectionHead, Row, Panel, Field, wrap } from "@/components/ui/Form";
 import { useCart } from "@/components/providers/CartProvider";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
-import { COMMUNES, PAYMENTS, fcfa, tierFor, deliveryFee, POINT_RATE, POINT_VALUE } from "@/lib/constants";
+import { COMMUNES, PAYMENTS, fcfa, tierFor, deliveryFee, memberDiscountValue, POINT_RATE, POINT_VALUE } from "@/lib/constants";
 import type { PaymentMethod } from "@/lib/types";
 
 export default function CheckoutPage() {
@@ -55,10 +55,11 @@ export default function CheckoutPage() {
   if (count === 0) return null;
 
   const fee = deliveryFee(form.commune, tier);
+  const memberDiscount = memberDiscountValue(subtotal, tier);
   const maxRedeem = profile ? Math.min(profile.points * POINT_VALUE, Math.round(subtotal * 0.5)) : 0;
   const redeemPts = form.usePoints && profile ? Math.floor(Math.min(profile.points, Math.floor((subtotal * 0.5) / POINT_VALUE))) : 0;
   const redeemValue = redeemPts * POINT_VALUE;
-  const total = Math.max(0, subtotal + fee - redeemValue);
+  const total = Math.max(0, subtotal + fee - memberDiscount - redeemValue);
   const pointsEarned = Math.floor(subtotal / POINT_RATE);
 
   const submit = async () => {
@@ -220,6 +221,7 @@ export default function CheckoutPage() {
           <div style={{ borderTop: "1px solid var(--line)", paddingTop: 12 }}>
             <Row label="Sous-total" value={fcfa(subtotal)} />
             <Row label={"Frais d'expédition" + (form.commune ? " · " + form.commune : "")} value={fee === 0 ? "Offerts" : fcfa(fee)} />
+            {memberDiscount > 0 && tier && <Row label={`Avantage ${tier.label} (−${Math.round(tier.discount * 100)}%)`} value={"−" + fcfa(memberDiscount)} />}
             {redeemPts > 0 && <Row label={`Points fidélité (−${redeemPts})`} value={"−" + fcfa(redeemValue)} />}
           </div>
 

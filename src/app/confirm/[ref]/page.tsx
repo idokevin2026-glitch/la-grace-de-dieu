@@ -70,6 +70,7 @@ export default async function ConfirmPage({ params }: { params: Promise<{ ref: s
         <div style={{ borderTop: "1px solid var(--line)", paddingTop: 12 }}>
           <Row label="Sous-total" value={fcfa(order.subtotal)} />
           <Row label="Frais d'expédition" value={order.shipping_fee === 0 ? "Offerts" : fcfa(order.shipping_fee)} />
+          {order.member_discount > 0 && <Row label="Avantage fidélité" value={"−" + fcfa(order.member_discount)} />}
           {order.points_used > 0 && <Row label={`Points utilisés (−${order.points_used})`} value={"−" + fcfa(order.points_used * POINT_VALUE)} />}
           <Row label="Total" value={fcfa(order.total)} big />
         </div>

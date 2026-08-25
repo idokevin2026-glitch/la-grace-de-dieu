@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { deliveryFee, fcfa, tierFor, POINT_RATE, POINT_VALUE, PAYMENTS, COMMUNES } from "@/lib/constants";
+import { deliveryFee, fcfa, tierFor, memberDiscountValue, POINT_RATE, POINT_VALUE, PAYMENTS, COMMUNES } from "@/lib/constants";
 import { withUniqueRef } from "@/lib/orders";
 import { sendWhatsAppText, orderReceivedMessage } from "@/lib/whatsapp";
 
@@ -62,35 +62,41 @@ export async function POST(request: NextRequest) {
 
   const subtotal = lineItems.reduce((s, it) => s + it.price * it.qty, 0);
   const shippingFee = deliveryFee(customer.commune, tier);
+  const memberDiscount = memberDiscountValue(subtotal, tier); // remise permanente Ivoire/Or
   const redeemPts = usePoints && profile ? Math.floor(Math.min(profile.points, Math.floor((subtotal * 0.5) / POINT_VALUE))) : 0;
   const redeemValue = redeemPts * POINT_VALUE;
-  const total = Math.max(0, subtotal + shippingFee - redeemValue);
+  const total = Math.max(0, subtotal + shippingFee - memberDiscount - redeemValue);
   const pointsEarned = Math.floor(subtotal / POINT_RATE);
 
   try {
     const order = await withUniqueRef(async (ref) => {
-      const { data, error } = await admin
-        .from("orders")
-        .insert({
-          ref,
-          user_id: user?.id ?? null,
-          status: "recue",
-          subtotal,
-          shipping_fee: shippingFee,
-          points_used: redeemPts,
-          points_earned: pointsEarned,
-          total,
-          payment_method: paymentMethod,
-          payment_status: "pending",
-          customer_name: customer.name.trim(),
-          customer_phone: customer.phone.trim(),
-          customer_email: customer.email?.trim() || null,
-          commune: customer.commune,
-          address: customer.address.trim(),
-          note: customer.note?.trim() || null,
-        })
-        .select()
-        .single();
+      const row = {
+        ref,
+        user_id: user?.id ?? null,
+        status: "recue",
+        subtotal,
+        shipping_fee: shippingFee,
+        member_discount: memberDiscount,
+        points_used: redeemPts,
+        points_earned: pointsEarned,
+        total,
+        payment_method: paymentMethod,
+        payment_status: "pending",
+        customer_name: customer.name.trim(),
+        customer_phone: customer.phone.trim(),
+        customer_email: customer.email?.trim() || null,
+        commune: customer.commune,
+        address: customer.address.trim(),
+        note: customer.note?.trim() || null,
+      };
+      let { data, error } = await admin.from("orders").insert(row).select().single();
+      // Repli si la migration 0002 (colonne member_discount) n'est pas encore appliquée :
+      // le total inclut déjà la remise, seul le détail comptable est omis.
+      if (error && (error.code === "42703" || error.code === "PGRST204" || /member_discount/.test(error.message))) {
+        const legacy: Record<string, unknown> = { ...row };
+        delete legacy.member_discount;
+        ({ data, error } = await admin.from("orders").insert(legacy).select().single());
+      }
       if (error) {
         if (error.code === "23505") return { conflict: true } as const;
         throw error;
