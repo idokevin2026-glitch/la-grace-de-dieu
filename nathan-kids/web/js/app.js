@@ -29,6 +29,7 @@
       cash: "Caisse & Banque", cashSub: "Soldes et mouvements", cashBox: "Caisse (espèces)", bank: "Banque",
       deposit: "Dépôt", withdraw: "Retrait", toBank: "Vers banque",
       team: "Équipe", teamSub: "Vendeuses de la boutique", addSeller: "Ajouter une vendeuse",
+      inviteSeller: "Inviter une vendeuse",
       remove: "Retirer", noSeller: "Aucune vendeuse.",
       noCredits: "Aucun crédit en cours 🎉", markPaid: "Marquer payé",
       inventory: "Inventaire", product: "Produit", search: "Rechercher…", cart: "Panier",
@@ -74,6 +75,7 @@
       cash: "Cash & Bank", cashSub: "Balances and moves", cashBox: "Cash", bank: "Bank",
       deposit: "Deposit", withdraw: "Withdraw", toBank: "To bank",
       team: "Team", teamSub: "Shop sellers", addSeller: "Add a seller",
+      inviteSeller: "Invite a seller",
       remove: "Remove", noSeller: "No seller yet.",
       noCredits: "No open credit 🎉", markPaid: "Mark paid",
       inventory: "Inventory", product: "Product", search: "Search…", cart: "Cart",
@@ -130,6 +132,30 @@
     const id = (NK.getShop() || {}).id || "";
     return `${location.origin}${location.pathname}?shop=${encodeURIComponent(id)}`;
   };
+
+  // Partage du lien d'invitation vendeuse (WhatsApp/partage natif, sinon copie).
+  // Réutilisé par l'accueil admin et l'écran Équipe — garantit que la vendeuse
+  // rejoint TOUJOURS la bonne boutique (plus de saisie manuelle du shopId, plus
+  // de création accidentelle d'une boutique séparée). `fallbackInput` = champ
+  // texte à sélectionner si l'API presse-papiers échoue.
+  async function shareInvite(fallbackInput) {
+    const link = shareLink();
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "NATHAN KIDS", text: t("shareHint"), url: link });
+      } else {
+        await navigator.clipboard.writeText(link);
+        toast(t("copied"));
+      }
+    } catch {
+      const inp = typeof fallbackInput === "string" ? $(fallbackInput) : fallbackInput;
+      if (inp) {
+        inp.select();
+        document.execCommand("copy");
+        toast(t("copied"));
+      }
+    }
+  }
 
   const fmt = (n) =>
     n == null ? t("noData") : new Intl.NumberFormat(lang === "en" ? "en-US" : "fr-FR").format(n) + " F";
@@ -603,6 +629,7 @@
           <button class="q q-stock" data-nav="stock"><span class="q-ic">📦</span>${t("stock")}</button>
           <button class="q q-credit" data-nav="credits"><span class="q-ic">📕</span>${t("credits")}</button>
           <button class="q q-report" data-nav="reports"><span class="q-ic">📊</span>${t("reports")}</button>
+          <button class="q q-invite" data-act="invite"><span class="q-ic">🔗</span>${t("inviteSeller")}</button>
         </div>
         <h3>${t("todayTitle")}</h3>
         ${stockCards}`;
@@ -632,6 +659,8 @@
 
     paint(header, body);
     $(".content").onclick = (e) => {
+      const act = e.target.closest("[data-act]");
+      if (act && act.dataset.act === "invite") return shareInvite();
       const b = e.target.closest("[data-nav]");
       if (b) go(b.dataset.nav);
     };
@@ -1521,25 +1550,7 @@
        <button class="primary big" id="add-staff">＋ ${t("addSeller")}</button>`,
     );
     const copyBtn = $("#share-copy");
-    if (copyBtn)
-      copyBtn.onclick = async () => {
-        const link = shareLink();
-        try {
-          if (navigator.share) {
-            await navigator.share({ title: "NATHAN KIDS", text: t("shareHint"), url: link });
-          } else {
-            await navigator.clipboard.writeText(link);
-            toast(t("copied"));
-          }
-        } catch {
-          const inp = $("#share-link");
-          if (inp) {
-            inp.select();
-            document.execCommand("copy");
-            toast(t("copied"));
-          }
-        }
-      };
+    if (copyBtn) copyBtn.onclick = () => shareInvite("#share-link");
     try {
       const staff = (await NK.reads.staff()).filter((u) => u.role === "staff" && u.active);
       $("#staff-list").innerHTML =
