@@ -163,6 +163,9 @@ h3 { margin: 20px 0 10px; font-size: 13px; color: var(--muted); text-transform: 
 .q-stock .q-ic { background: #e5eff9; }
 .q-credit .q-ic { background: #fce7f0; }
 .q-report .q-ic { background: #fdf1de; }
+/* Inviter une vendeuse : action clé pour garder les données centralisées → occupe toute la largeur, accent vert. */
+.q-invite { grid-column: 1 / -1; border-color: var(--green); }
+.q-invite .q-ic { background: #e4f5ea; }
 
 /* ---------- CTA vente (vendeuse) ---------- */
 .sell-cta {
@@ -412,7 +415,7 @@ button.big { font-size: 17px; }
   .alert { background: #2a2313; border-color: #46381c; }
   .alert-txt b, .alert-go { color: #e8c583; }
   .alert-txt small { color: #c9a75f; }
-  .mv-sum.in, .dur.live, .q-sale .q-ic, .t-cash .tile-ic { background: #16301f; }
+  .mv-sum.in, .dur.live, .q-sale .q-ic, .q-invite .q-ic, .t-cash .tile-ic { background: #16301f; }
   .mv-sum.out { background: #331a1a; }
   .mv-badge.in { background: #16301f; }
   .mv-badge.out { background: #331a1a; }
