@@ -45,18 +45,19 @@ begin
   -- ── 2) CLIENTS : dédoublonnage par nom (insensible à la casse) ──────────────
   -- Client canonique = plus petit id pour un même nom. On repointe ventes/crédits
   -- vers lui, on supprime les doublons, puis on déplace le reste vers la cible.
+  -- keep_id = plus petit id par nom (first_value car min() n'existe pas pour uuid).
   update public.sales sa set customer_id = c.keep_id
-    from (select id, min(id) over (partition by lower(name)) as keep_id
+    from (select id, first_value(id) over (partition by lower(name) order by id) as keep_id
             from public.customers) c
    where sa.customer_id = c.id and c.id <> c.keep_id;
 
   update public.credits cr set customer_id = c.keep_id
-    from (select id, min(id) over (partition by lower(name)) as keep_id
+    from (select id, first_value(id) over (partition by lower(name) order by id) as keep_id
             from public.customers) c
    where cr.customer_id = c.id and c.id <> c.keep_id;
 
   delete from public.customers dup
-   using (select id, min(id) over (partition by lower(name)) as keep_id
+   using (select id, first_value(id) over (partition by lower(name) order by id) as keep_id
             from public.customers) c
    where dup.id = c.id and c.id <> c.keep_id;
 
